@@ -1,0 +1,1014 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Keuangan & Kasir — Dark Soft (Responsive)</title>
+
+  <!-- Font + Chart.js -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    :root{
+      --bg: #0b1116;
+      --panel: #0f1722;
+      --muted: #97a3b2;
+      --pink: #ff85c1;
+      --pink-2: #ffb6d6;
+      --accent: #e18fb8;
+      --card-shadow: 0 8px 30px rgba(0,0,0,0.55);
+      --glass-border: rgba(255,255,255,0.03);
+      --max-width: 1200px;
+    }
+
+    /* Reset + base */
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%}
+    body{
+      background: linear-gradient(180deg, #07121a 0%, var(--bg) 100%);
+      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      color: #e6eef8;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      line-height:1.35;
+      padding: 12px;
+    }
+
+    /* App wrapper - center + responsive max width */
+    .app-wrap{
+      max-width: var(--max-width);
+      margin: 6px auto;
+      display: grid;
+      grid-template-columns: 260px 1fr; /* sidebar + main */
+      gap: 16px;
+      align-items: start;
+    }
+
+    /* SIDEBAR */
+    .sidebar{
+      background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.00));
+      border-radius: 12px;
+      padding: 18px;
+      box-shadow: var(--card-shadow);
+      border: 1px solid var(--glass-border);
+      height: calc(100vh - 48px);
+      position: sticky;
+      top: 12px;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      min-width:0;
+    }
+    .brand{font-weight:700;color:var(--pink);font-size:18px}
+    .small{font-size:13px;color:var(--muted)}
+    .nav{display:flex;flex-direction:column;gap:8px;margin-top:6px}
+    .nav button{
+      background:transparent;border:0;color:#e6eef8;padding:10px 12px;border-radius:8px;text-align:left;cursor:pointer;
+      transition:all .12s;font-weight:600;
+    }
+    .nav button:hover{background:rgba(255,255,255,0.02)}
+    .nav button.active{color:var(--pink);background:rgba(255,255,255,0.02)}
+    .sidebar .meta{margin-top:auto}
+    .btn-ghost{background:transparent;border:1px solid rgba(255,255,255,0.04);padding:8px;border-radius:8px;color:var(--muted);cursor:pointer}
+    .badge{background:rgba(255,255,255,0.03);padding:6px 8px;border-radius:8px;font-weight:600;color:var(--pink)}
+
+    /* MAIN */
+    .main{
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      min-height: calc(100vh - 48px);
+    }
+    .topbar{
+      display:flex;justify-content:space-between;align-items:center;gap:12px;
+    }
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.00));
+      border-radius: 12px;
+      padding: 14px;
+      box-shadow: var(--card-shadow);
+      border: 1px solid var(--glass-border);
+    }
+    .row{display:flex;gap:12px;flex-wrap:wrap}
+    .col{flex:1;min-width:220px}
+    input,select,textarea{width:100%;padding:8px;border-radius:8px;border:1px solid var(--glass-border);background:transparent;color:#e6eef8}
+    button.btn{background:linear-gradient(90deg,var(--pink),var(--pink-2));border:none;color:#071127;padding:8px 12px;border-radius:8px;cursor:pointer}
+    button.btn.secondary{background:#1b2430;color:#e6eef8}
+    table{width:100%;border-collapse:collapse;margin-top:8px;font-size:13px}
+    th,td{padding:8px;border-bottom:1px solid rgba(255,255,255,0.03);color:#dff0ff;text-align:left}
+    th{color:var(--muted);font-weight:600}
+
+    .kicker{font-size:12px;color:var(--muted)}
+    .muted{color:var(--muted)}
+    .hidden{display:none!important}
+
+    /* Tabs within dashboard */
+    .tabs{display:flex;gap:8px;border-bottom:1px solid rgba(255,255,255,0.03);padding-bottom:8px;margin-bottom:10px;flex-wrap:wrap}
+    .tabbtn{background:transparent;border:0;color:var(--muted);padding:8px 12px;border-radius:8px;cursor:pointer}
+    .tabbtn.active{color:var(--pink);background:rgba(255,255,255,0.02)}
+
+    /* Toast */
+    .toast{position:fixed;right:18px;bottom:18px;background:var(--pink);color:#071127;padding:10px 14px;border-radius:10px;z-index:9999;opacity:0;transform:translateY(6px);transition:all .28s}
+    .toast.show{opacity:1;transform:translateY(0)}
+
+    /* Product card (kasir) */
+    .product-card{padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.02);display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+
+    /* small responsive tweaks */
+    @media (max-width: 1100px){
+      .app-wrap{grid-template-columns: 1fr; padding-bottom: 12px}
+      .sidebar{height:auto;position:relative;display:flex;flex-direction:row;align-items:center;gap:12px;padding:10px}
+      .nav{flex-direction:row;overflow:auto}
+      .nav button{white-space:nowrap}
+      .sidebar .meta{display:none}
+    }
+
+    /* mobile-first strong responsiveness */
+    @media (max-width: 720px){
+      body{padding:8px}
+      .card{padding:10px}
+      .brand{font-size:16px}
+      .sidebar{padding:8px}
+      .topbar{flex-direction:column;align-items:flex-start;gap:6px}
+      .row{flex-direction:column}
+      .product-card{flex-direction:column;align-items:flex-start}
+      .product-card > div:last-child{align-self:stretch;display:flex;justify-content:space-between}
+    }
+
+    /* small helpers */
+    .small-quiet{font-size:12px;color:var(--muted)}
+    .table-wrap{overflow:auto;max-width:100%}
+  </style>
+</head>
+<body>
+
+  <div class="app-wrap" id="appWrap">
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar" aria-label="Sidebar">
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <div class="brand">💖 Jeda Keuangan</div>
+        <div class="small">Dark Soft • Admin + Kasir</div>
+      </div>
+
+      <!-- navigation items (top-level) -->
+      <div class="nav" id="nav" role="navigation" aria-label="Main navigation">
+        <button id="nav_dashboard" class="active" aria-controls="view_dashboard">📊 Dashboard</button>
+        <button id="nav_kasir" aria-controls="view_kasir">🛒 Kasir</button>
+        <button id="nav_products" aria-controls="view_products">🧾 Produk</button>
+        <button id="nav_keuangan" aria-controls="view_keuangan">💼 Keuangan</button>
+      </div>
+
+      <!-- meta / user info at bottom of sidebar -->
+      <div class="meta">
+        <div class="small">Masuk sebagai</div>
+        <div id="userEmail" style="font-weight:700;word-break:break-all;margin-top:6px">-</div>
+        <div style="margin-top:10px;display:flex;gap:8px">
+          <button id="btnSignOut" class="btn-ghost" style="flex:1">Logout</button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main">
+      <!-- TOPBAR -->
+      <div class="topbar">
+        <div>
+          <h2 style="margin:0;color:var(--pink)">Dashboard & Kasir</h2>
+          <div class="kicker">Satu file — responsive — dark soft pink</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <div class="kicker muted" id="roleLabel">-</div>
+        </div>
+      </div>
+
+      <!-- LOGIN VIEW -->
+      <section id="view_login" class="card">
+        <h3 style="color:var(--pink);margin-bottom:8px">Login</h3>
+        <div class="row">
+          <div class="col" style="max-width:520px">
+            <div class="kicker muted">Masuk menggunakan akun Firebase (Email/Password)</div>
+            <input id="login_email" type="email" placeholder="Email" style="margin-top:8px"/>
+            <input id="login_pass" type="password" placeholder="Password" style="margin-top:8px"/>
+            <div style="display:flex;gap:8px;margin-top:10px">
+              <button id="btnLogin" class="btn">Masuk</button>
+              <button id="btnClear" class="btn secondary">Bersihkan</button>
+            </div>
+            <p id="login_msg" class="kicker muted" style="margin-top:8px;color:#ffb6d6"></p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ADMIN CHOICES -->
+      <section id="view_admin_choices" class="card hidden">
+        <h3 style="color:var(--pink)">Halo Admin — pilih tampilan</h3>
+        <div style="display:flex;gap:12px;margin-top:8px;flex-wrap:wrap">
+          <button id="goto_dashboard" class="btn">Buka Dashboard</button>
+          <button id="goto_kasir" class="btn">Buka Kasir</button>
+        </div>
+      </section>
+
+      <!-- DASHBOARD (ADMIN) -->
+      <section id="view_dashboard" class="card hidden" aria-live="polite">
+        <!-- top summary cards -->
+        <div class="row">
+          <div class="col card">
+            <div class="kicker muted">Pendapatan Kotor (total)</div>
+            <div id="gross_income" style="font-weight:700;font-size:20px;margin-top:6px">Rp 0</div>
+            <div class="kicker muted" style="margin-top:6px">Total penjualan (harga jual × qty)</div>
+          </div>
+          <div class="col card">
+            <div class="kicker muted">Pendapatan Bersih (total)</div>
+            <div id="net_income" style="font-weight:700;font-size:20px;margin-top:6px">Rp 0</div>
+            <div class="kicker muted" style="margin-top:6px">Kotor − (OPR + HPP + Pengeluaran lain)</div>
+          </div>
+          <div class="col card">
+            <div class="kicker muted">Sisa Kas</div>
+            <div id="balance" style="font-weight:700;font-size:20px;margin-top:6px">Rp 0</div>
+            <div class="kicker muted" style="margin-top:6px">Saldo di keuangan utama</div>
+          </div>
+        </div>
+
+        <!-- summary chart -->
+        <div class="card" style="margin-top:12px">
+          <h4 style="color:var(--pink);margin:0 0 8px 0">Grafik Ringkasan</h4>
+          <canvas id="chartSummary" style="max-height:320px"></canvas>
+        </div>
+
+        <!-- tabs for different financial tables -->
+        <div class="card" style="margin-top:12px">
+          <div class="tabs" id="financeTabs" role="tablist" aria-label="Tab Keuangan">
+            <button class="tabbtn active" data-tab="tab_utama" role="tab" aria-selected="true">Keuangan Utama</button>
+            <button class="tabbtn" data-tab="tab_opr" role="tab" aria-selected="false">Operasional</button>
+            <button class="tabbtn" data-tab="tab_hpp" role="tab" aria-selected="false">Belanja / HPP</button>
+            <button class="tabbtn" data-tab="tab_tab" role="tab" aria-selected="false">Tabungan</button>
+            <button class="tabbtn" data-tab="tab_laporan" role="tab" aria-selected="false">Laporan</button>
+          </div>
+
+          <!-- TAB: Keuangan Utama -->
+          <div id="tab_utama" class="tabpanel" role="tabpanel">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+              <div style="flex:1;min-width:240px">
+                <div class="kicker muted">Tambah manual keuangan utama</div>
+                <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;max-width:760px">
+                  <input id="main_desc" placeholder="Deskripsi"/>
+                  <select id="main_type" style="width:160px"><option value="pemasukan">Pemasukan</option><option value="pengeluaran">Pengeluaran</option></select>
+                  <input id="main_amount" placeholder="Jumlah" type="number" style="width:160px"/>
+                  <button id="btn_save_main" class="btn">Simpan</button>
+                </div>
+              </div>
+              <div style="min-width:150px">
+                <button id="btnExportCsv" class="btn secondary">Export CSV</button>
+              </div>
+            </div>
+
+            <div style="margin-top:12px;max-height:260px;overflow:auto" class="table-wrap">
+              <table id="table_keuangan_utama"><thead><tr><th>Waktu</th><th>Desc</th><th>Jenis</th><th>Jumlah</th></tr></thead><tbody></tbody></table>
+            </div>
+          </div>
+
+          <!-- TAB: Operasional -->
+          <div id="tab_opr" class="tabpanel hidden" role="tabpanel" aria-hidden="true">
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+              <input id="opr_desc" placeholder="Deskripsi operasional"/>
+              <input id="opr_amount" type="number" placeholder="Jumlah" style="width:160px"/>
+              <button id="btn_move_opr" class="btn">Pindahkan dari Utama</button>
+            </div>
+            <div style="margin-top:12px;max-height:260px;overflow:auto" class="table-wrap">
+              <table id="table_opr"><thead><tr><th>Waktu</th><th>Desc</th><th>Jumlah</th><th>Pencatat</th></tr></thead><tbody></tbody></table>
+            </div>
+          </div>
+
+          <!-- TAB: HPP / Belanja -->
+          <div id="tab_hpp" class="tabpanel hidden" role="tabpanel" aria-hidden="true">
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+              <input id="hpp_desc" placeholder="Deskripsi belanja / HPP"/>
+              <input id="hpp_amount" type="number" placeholder="Jumlah" style="width:160px"/>
+              <button id="btn_move_hpp" class="btn">Pindahkan dari Utama</button>
+            </div>
+            <div style="margin-top:12px;max-height:260px;overflow:auto" class="table-wrap">
+              <table id="table_hpp"><thead><tr><th>Waktu</th><th>Desc</th><th>Jumlah</th><th>Pencatat</th></tr></thead><tbody></tbody></table>
+            </div>
+          </div>
+
+          <!-- TAB: Tabungan -->
+          <div id="tab_tab" class="tabpanel hidden" role="tabpanel" aria-hidden="true">
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+              <input id="tab_desc" placeholder="Deskripsi tabungan"/>
+              <input id="tab_amount" type="number" placeholder="Jumlah" style="width:160px"/>
+              <button id="btn_move_tab" class="btn">Pindahkan dari Utama</button>
+            </div>
+            <div style="margin-top:12px;max-height:260px;overflow:auto" class="table-wrap">
+              <table id="table_tabungan"><thead><tr><th>Waktu</th><th>Desc</th><th>Jumlah</th><th>Pencatat</th></tr></thead><tbody></tbody></table>
+            </div>
+          </div>
+
+          <!-- TAB: Laporan (daily + transaksi) -->
+          <div id="tab_laporan" class="tabpanel hidden" role="tabpanel" aria-hidden="true">
+            <div class="row">
+              <div class="col">
+                <h4 class="kicker muted">Pendapatan Harian (7 hari terakhir)</h4>
+                <div class="daily-table card" style="padding:10px;">
+                  <table id="table_daily"><thead><tr><th>Tanggal</th><th>Pend. Kotor</th><th>Pend. Bersih</th></tr></thead><tbody></tbody></table>
+                </div>
+                <div style="margin-top:8px">
+                  <canvas id="chartDaily" style="max-height:200px"></canvas>
+                </div>
+              </div>
+              <div class="col">
+                <h4 class="kicker muted">Transaksi Terakhir</h4>
+                <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
+                  <input type="date" id="filter_from"/><input type="date" id="filter_to"/>
+                  <button id="btnApplyFilter" class="btn">Filter</button>
+                </div>
+                <div style="max-height:320px;overflow:auto" class="table-wrap">
+                  <table id="table_transaksi"><thead><tr><th>Waktu</th><th>Tipe</th><th>Desc</th><th>Jumlah</th><th>User</th></tr></thead><tbody></tbody></table>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- PRODUCTS (Admin) -->
+      <section id="view_products" class="card hidden">
+        <h4 style="color:var(--pink);margin:0 0 8px 0">Produk (Admin)</h4>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <input id="prod_name" placeholder="Nama produk" style="flex:1;min-width:160px"/>
+          <input id="prod_cost" placeholder="Harga modal" type="number" style="width:150px"/>
+          <input id="prod_price" placeholder="Harga jual" type="number" style="width:150px"/>
+          <button id="btn_add_product" class="btn">Tambah</button>
+        </div>
+        <div style="margin-top:12px;max-height:360px;overflow:auto" class="table-wrap">
+          <table id="table_products"><thead><tr><th>Nama</th><th>Modal</th><th>Jual</th><th>Aksi</th></tr></thead><tbody></tbody></table>
+        </div>
+      </section>
+
+      <!-- KEUANGAN OVERVIEW (Admin) -->
+      <section id="view_keuangan" class="card hidden">
+        <h4 style="color:var(--pink);margin:0 0 8px 0">Keuangan Overview</h4>
+        <div class="row">
+          <div class="col card">
+            <h5 class="kicker muted">Keuangan Utama (Ringkasan)</h5>
+            <div style="max-height:260px;overflow:auto" class="table-wrap">
+              <table id="table_keuangan_utama_overview"><thead><tr><th>Waktu</th><th>Desc</th><th>Jenis</th><th>Jumlah</th></tr></thead><tbody></tbody></table>
+            </div>
+          </div>
+          <div class="col card">
+            <h5 class="kicker muted">Operasional / Tabungan / HPP (Ringkasan)</h5>
+            <div style="max-height:260px;overflow:auto" class="table-wrap">
+              <table id="table_others_overview"><thead><tr><th>Waktu</th><th>Jenis</th><th>Desc</th><th>Jumlah</th></tr></thead><tbody></tbody></table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- KASIR -->
+      <section id="view_kasir" class="card hidden">
+        <div class="row">
+          <div style="flex:0 0 420px;min-width:260px" class="card">
+            <h4 style="color:var(--pink);margin:0 0 8px 0">Daftar Produk</h4>
+            <div id="products_container" style="max-height:420px;overflow:auto"></div>
+            <div style="margin-top:8px" class="kicker muted">Klik "Tambah" untuk memasukkan ke keranjang</div>
+          </div>
+
+          <div style="flex:1;min-width:260px" class="card">
+            <h4 style="color:var(--pink);margin:0 0 8px 0">Keranjang</h4>
+            <div style="overflow:auto;max-height:320px">
+              <table id="cart_table"><thead><tr><th>Produk</th><th>Qty</th><th>Harga</th><th>Subtotal</th><th></th></tr></thead><tbody></tbody></table>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
+              <div class="kicker muted">Total (Kotor)</div>
+              <div id="cart_total" style="font-weight:700">Rp 0</div>
+            </div>
+
+            <div style="margin-top:10px;display:flex;gap:8px;align-items:center">
+              <select id="pay_method"><option value="cash">Cash</option><option value="qris">QRIS</option></select>
+              <button id="btn_checkout" class="btn">Checkout</button>
+              <button id="btn_clear_cart" class="btn secondary">Kosongkan</button>
+            </div>
+
+            <div style="margin-top:12px">
+              <div class="kicker muted">Ringkasan Keranjang</div>
+              <div style="display:flex;gap:12px;margin-top:6px;flex-wrap:wrap">
+                <div style="min-width:140px" class="card"><div class="kicker muted">Pendapatan Kotor (keranjang)</div><div id="cart_gross" style="font-weight:700">Rp 0</div></div>
+                <div style="min-width:140px" class="card"><div class="kicker muted">Pendapatan Bersih (keranjang)</div><div id="cart_net" style="font-weight:700">Rp 0</div></div>
+                <div style="min-width:140px" class="card"><div class="kicker muted">Total HPP (modal)</div><div id="cart_hpp" style="font-weight:700">Rp 0</div></div>
+              </div>
+            </div>
+
+            <div style="margin-top:12px">
+              <h5 class="kicker muted">Riwayat Transaksi Kasir (terakhir)</h5>
+              <div style="max-height:160px;overflow:auto" class="table-wrap">
+                <table id="table_recent_kasir"><thead><tr><th>Waktu</th><th>Desc</th><th>Jumlah</th></tr></thead><tbody></tbody></table>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- TOAST -->
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <!-- Firebase compat libraries -->
+  <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-database-compat.js"></script>
+
+  <script>
+  /***** CONFIG - sesuaikan jika perlu *****/
+  const firebaseConfig = {
+    apiKey: "AIzaSyAkbJYrKPcsmzwhDewt7NAZUs8rUtRl-NY",
+    authDomain: "jeda-voice.firebaseapp.com",
+    databaseURL: "https://jeda-voice-default-rtdb.firebaseio.com",
+    projectId: "jeda-voice",
+    storageBucket: "jeda-voice.firebasestorage.app",
+    messagingSenderId: "111928151860",
+    appId: "1:111928151860:web:fc930983d82483d90fdf61",
+    measurementId: "G-VM1H1R3J0S"
+  };
+
+  // Users lists (sesuaikan)
+  const ADMIN_EMAILS = ["shysondiamond@gmail.com"];
+  const KASIR_EMAILS = ["aldoefendi55@gmail.com"];
+
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.database();
+
+  // UI helpers
+  const $ = id => document.getElementById(id);
+  const showToast = (msg, t = 2400) => {
+    const el = $('toast'); el.textContent = msg; el.classList.add('show');
+    setTimeout(()=> el.classList.remove('show'), t);
+  };
+  const formatRp = n => 'Rp ' + Number(n || 0).toLocaleString();
+  const escapeHtml = s => s ? String(s).replace(/[&<>"'`=\/]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','/':'&#x2F;','`':'&#x60;','=':'&#x3D;'})[c]) : '';
+
+  // DOM refs
+  const views = {
+    login: $('view_login'),
+    adminChoices: $('view_admin_choices'),
+    dashboard: $('view_dashboard'),
+    products: $('view_products'),
+    keuangan: $('view_keuangan'),
+    kasir: $('view_kasir')
+  };
+  const navButtons = {
+    dashboard: $('nav_dashboard'), kasir: $('nav_kasir'), products: $('nav_products'), keuangan: $('nav_keuangan')
+  };
+
+  // login
+  const login_email = $('login_email'), login_pass = $('login_pass'), btnLogin = $('btnLogin'), btnClear = $('btnClear'), login_msg = $('login_msg');
+  const btnSignOut = $('btnSignOut'), userEmailEl = $('userEmail'), roleLabel = $('roleLabel');
+
+  // dashboard elements
+  const gross_income = $('gross_income'), net_income = $('net_income'), balanceEl = $('balance');
+  const table_keuangan_utama = document.querySelector('#table_keuangan_utama tbody');
+  const table_keuangan_utama_overview = document.querySelector('#table_keuangan_utama_overview tbody');
+  const table_opr = document.querySelector('#table_opr tbody'), table_hpp = document.querySelector('#table_hpp tbody'), table_tabungan = document.querySelector('#table_tabungan tbody');
+  const table_others_overview = document.querySelector('#table_others_overview tbody');
+  const table_products = document.querySelector('#table_products tbody'), products_container = $('products_container');
+  const prod_name = $('prod_name'), prod_cost = $('prod_cost'), prod_price = $('prod_price'), btn_add_product = $('btn_add_product');
+
+  // main manual fields
+  const main_desc = $('main_desc'), main_type = $('main_type'), main_amount = $('main_amount'), btn_save_main = $('btn_save_main');
+  const opr_desc = $('opr_desc'), opr_amount = $('opr_amount'), btn_move_opr = $('btn_move_opr');
+  const hpp_desc = $('hpp_desc'), hpp_amount = $('hpp_amount'), btn_move_hpp = $('btn_move_hpp');
+  const tab_desc = $('tab_desc'), tab_amount = $('tab_amount'), btn_move_tab = $('btn_move_tab');
+
+  // transactions / daily
+  const table_transaksi = document.querySelector('#table_transaksi tbody');
+  const table_daily = document.querySelector('#table_daily tbody');
+  const table_recent_kasir = document.querySelector('#table_recent_kasir tbody');
+
+  // cart / kasir
+  const cart_table = document.querySelector('#cart_table tbody'), cart_total = $('cart_total'), cart_gross = $('cart_gross'), cart_net = $('cart_net'), cart_hpp = $('cart_hpp');
+  const btn_checkout = $('btn_checkout'), btn_clear_cart = $('btn_clear_cart'), pay_method = $('pay_method');
+
+  // other buttons
+  const btnExportCsv = $('btnExportCsv'), btnApplyFilter = $('btnApplyFilter'), filter_from = $('filter_from'), filter_to = $('filter_to');
+
+  // charts
+  const chartSummaryCtx = document.getElementById('chartSummary').getContext('2d');
+  let chartSummary = null;
+  const chartDailyCtx = document.getElementById('chartDaily') ? document.getElementById('chartDaily').getContext('2d') : null;
+  let chartDaily = null;
+
+  // app state
+  let currentUser = null, isAdmin = false;
+  let PRODUCTS = {}, CART = [];
+
+  // AUTH & NAV
+  btnLogin.addEventListener('click', ()=> {
+    const email = login_email.value.trim(), pass = login_pass.value;
+    if(!email || !pass){ login_msg.textContent = 'Isi email & password'; return; }
+    login_msg.textContent = 'Masuk...';
+    auth.signInWithEmailAndPassword(email, pass).catch(err => {
+      console.error(err); login_msg.textContent = 'Login gagal'; showToast('Login gagal');
+    });
+  });
+  btnClear.addEventListener('click', ()=> { login_email.value=''; login_pass.value=''; login_msg.textContent=''; });
+  btnSignOut.addEventListener('click', ()=> auth.signOut());
+
+  auth.onAuthStateChanged(user => {
+    currentUser = user;
+    if(!user){
+      // not logged in => show login
+      showOnly('login');
+      userEmailEl.textContent = '-';
+      roleLabel.textContent = '-';
+      // clear any previously attached realtime listeners? (not implemented - small apps ok)
+      return;
+    }
+    // logged in => determine role
+    userEmailEl.textContent = user.email;
+    isAdmin = ADMIN_EMAILS.includes(user.email);
+    roleLabel.textContent = isAdmin ? 'Admin' : 'Kasir';
+
+    // admin sees choice, kasir sees kasir directly
+    if(isAdmin) showOnly('adminChoices'); else showOnly('kasir');
+
+    attachListeners(); // attach on first login
+  });
+
+  // sidebar nav actions + active state
+  function setSidebarActive(key){
+    Object.values(navButtons).forEach(b => b.classList.remove('active'));
+    if(navButtons[key]) navButtons[key].classList.add('active');
+  }
+  navButtons.dashboard.addEventListener('click', ()=> { if(!checkAdmin()) return; showOnly('dashboard'); setSidebarActive('dashboard'); });
+  navButtons.kasir.addEventListener('click', ()=> { showOnly('kasir'); setSidebarActive('kasir'); });
+  navButtons.products.addEventListener('click', ()=> { if(!checkAdmin()) return; showOnly('products'); setSidebarActive('products'); });
+  navButtons.keuangan.addEventListener('click', ()=> { if(!checkAdmin()) return; showOnly('keuangan'); setSidebarActive('keuangan'); });
+
+  $('goto_dashboard')?.addEventListener('click', ()=> { if(!checkAdmin()) return; showOnly('dashboard'); setSidebarActive('dashboard'); });
+  $('goto_kasir')?.addEventListener('click', ()=> { showOnly('kasir'); setSidebarActive('kasir'); });
+
+  function showOnly(key){
+    Object.keys(views).forEach(k => views[k].classList.add('hidden'));
+    if(views[key]) views[key].classList.remove('hidden');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function checkAdmin(){
+    if(!currentUser){ showToast('Harap login'); return false; }
+    if(!isAdmin){ showToast('Hanya admin yang boleh'); return false; }
+    return true;
+  }
+
+  /***** Attach listeners & realtime sync *****/
+  let attached = false;
+  function attachListeners(){
+    if(attached) return;
+    attached = true;
+
+    /***** PRODUCTS (realtime) *****/
+    db.ref('produk').on('value', snap => {
+      PRODUCTS = {}; table_products.innerHTML = ''; products_container.innerHTML = '';
+      snap.forEach(ch => {
+        const p = ch.val(); if(!p) return;
+        PRODUCTS[ch.key] = p;
+
+        // table row for admin product management
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${escapeHtml(p.name)}</td><td>${formatRp(p.cost)}</td><td>${formatRp(p.price)}</td>
+          <td>
+            <button class="btn small edit" data-id="${ch.key}" style="padding:6px">Edit</button>
+            <button class="btn small del" data-id="${ch.key}" style="padding:6px;background:#1a2330;color:#e7eef8">Hapus</button>
+          </td>`;
+        table_products.appendChild(tr);
+
+        // product card for kasir list
+        const div = document.createElement('div'); div.className = 'product-card';
+        div.innerHTML = `<div>
+            <div style="font-weight:600">${escapeHtml(p.name)}</div>
+            <div class="kicker muted">Jual: ${formatRp(p.price)} • Modal: ${formatRp(p.cost)}</div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">
+            <button class="btn add-to-cart" data-id="${ch.key}" style="padding:6px">Tambah</button>
+            ${ isAdmin ? `<button class="btn edit-card" data-id="${ch.key}" style="padding:6px;background:#1a2330;color:#e7eef8">Edit</button>` : '' }
+          </div>`;
+        products_container.appendChild(div);
+      });
+
+      // attach event handlers (delegated)
+      table_products.querySelectorAll('.edit').forEach(b => b.addEventListener('click', async e => {
+        if(!checkAdmin()) return;
+        const id = e.target.dataset.id; const p = PRODUCTS[id];
+        const name = prompt('Nama produk', p.name); const cost = prompt('Harga modal', p.cost); const price = prompt('Harga Jual', p.price);
+        if(!name || !cost || !price) return;
+        await db.ref('produk/' + id).update({ name, cost: Number(cost), price: Number(price) });
+        showToast('Produk diperbarui');
+      }));
+      table_products.querySelectorAll('.del').forEach(b => b.addEventListener('click', async e => {
+        if(!checkAdmin()) return;
+        const id = e.target.dataset.id; if(!confirm('Hapus produk?')) return;
+        await db.ref('produk/' + id).remove(); showToast('Produk dihapus');
+      }));
+
+      products_container.querySelectorAll('.add-to-cart').forEach(b => b.addEventListener('click', e => addToCart(e.target.dataset.id, 1)));
+      products_container.querySelectorAll('.edit-card').forEach(b => b.addEventListener('click', async e => {
+        if(!checkAdmin()) return;
+        const id = e.target.dataset.id; const p = PRODUCTS[id];
+        const name = prompt('Nama produk', p.name); const cost = prompt('Modal', p.cost); const price = prompt('Harga Jual', p.price);
+        if(!name || !cost || !price) return;
+        await db.ref('produk/' + id).update({ name, cost: Number(cost), price: Number(price) });
+        showToast('Produk diperbarui');
+      }));
+    });
+
+    // add product (admin)
+    btn_add_product.addEventListener('click', async () => {
+      if(!checkAdmin()) return;
+      const name = prod_name.value.trim(), cost = Number(prod_cost.value), price = Number(prod_price.value);
+      if(!name || !cost || !price) return showToast('Isi data produk lengkap');
+      const id = db.ref().child('produk').push().key;
+      await db.ref('produk/' + id).set({ id, name, cost, price });
+      prod_name.value=''; prod_cost.value=''; prod_price.value='';
+      showToast('Produk disimpan');
+    });
+
+    /***** KEUANGAN UTAMA (realtime) *****/
+    db.ref('keuangan_utama').on('value', snap => {
+      table_keuangan_utama.innerHTML = ''; table_keuangan_utama_overview.innerHTML = '';
+      let pemasukan = 0, pengeluaran = 0, opr = 0, hpp = 0;
+      snap.forEach(ch => {
+        const d = ch.val(); if(!d) return;
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${d.date||''}</td><td>${escapeHtml(d.desc||'')}</td><td>${escapeHtml(d.type||'')}</td><td>${formatRp(d.amount)}</td>`;
+        table_keuangan_utama.prepend(tr);
+        table_keuangan_utama_overview.prepend(tr.cloneNode(true));
+        // categorize (note: types used: pemasukan, oprational, hpp, pengeluaran)
+        if(d.type === 'pemasukan') pemasukan += Number(d.amount||0);
+        else if(d.type === 'oprational') opr += Number(d.amount||0);
+        else if(d.type === 'hpp') hpp += Number(d.amount||0);
+        else pengeluaran += Number(d.amount||0);
+      });
+      const totalExpenses = pengeluaran + opr + hpp;
+      const balance = pemasukan - totalExpenses;
+      gross_income.textContent = formatRp(pemasukan);
+      net_income.textContent = formatRp(pemasukan - totalExpenses);
+      balanceEl.textContent = formatRp(balance);
+      updateChartSummary(pemasukan, pengeluaran, opr, hpp, balance);
+      computeAndRenderDaily();
+    });
+
+    /***** KEUANGAN OPERASIONAL, HPP, TABUNGAN listeners *****/
+    db.ref('keuangan_opr').on('value', snap => {
+      table_opr.innerHTML = '';
+      // we clear only others overview in the three listeners to avoid duplicates; instead rebuild later
+      rebuildOthersOverviewAsync();
+      snap.forEach(ch => {
+        const d = ch.val(); if(!d) return;
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${d.date||''}</td><td>${escapeHtml(d.desc||'')}</td><td>${formatRp(d.amount)}</td><td>${escapeHtml(d.user||'')}</td>`;
+        table_opr.prepend(tr);
+      });
+    });
+
+    db.ref('keuangan_hpp').on('value', snap => {
+      table_hpp.innerHTML = '';
+      rebuildOthersOverviewAsync();
+      snap.forEach(ch => {
+        const d = ch.val(); if(!d) return;
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${d.date||''}</td><td>${escapeHtml(d.desc||'')}</td><td>${formatRp(d.amount)}</td><td>${escapeHtml(d.user||'')}</td>`;
+        table_hpp.prepend(tr);
+      });
+    });
+
+    db.ref('keuangan_tabungan').on('value', snap => {
+      table_tabungan.innerHTML = '';
+      rebuildOthersOverviewAsync();
+      snap.forEach(ch => {
+        const d = ch.val(); if(!d) return;
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${d.date||''}</td><td>${escapeHtml(d.desc||'')}</td><td>${formatRp(d.amount)}</td><td>${escapeHtml(d.user||'')}</td>`;
+        table_tabungan.prepend(tr);
+      });
+    });
+
+    // small helper to rebuild others overview (collects opr/hpp/tabungan as separate queries)
+    async function rebuildOthersOverviewAsync(){
+      try{
+        const [oprSnap, hppSnap, tabSnap] = await Promise.all([
+          db.ref('keuangan_opr').once('value'),
+          db.ref('keuangan_hpp').once('value'),
+          db.ref('keuangan_tabungan').once('value')
+        ]);
+        table_others_overview.innerHTML = '';
+        // Operasional
+        oprSnap.forEach(s => {
+          const d = s.val();
+          const tr = document.createElement('tr');
+          tr.innerHTML = `<td>${d.date||''}</td><td>Operasional</td><td>${escapeHtml(d.desc||'')}</td><td>${formatRp(d.amount)}</td>`;
+          table_others_overview.prepend(tr);
+        });
+        // HPP
+        hppSnap.forEach(s => {
+          const d = s.val();
+          const tr = document.createElement('tr');
+          tr.innerHTML = `<td>${d.date||''}</td><td>HPP</td><td>${escapeHtml(d.desc||'')}</td><td>${formatRp(d.amount)}</td>`;
+          table_others_overview.prepend(tr);
+        });
+        // Tabungan
+        tabSnap.forEach(s => {
+          const d = s.val();
+          const tr = document.createElement('tr');
+          tr.innerHTML = `<td>${d.date||''}</td><td>Tabungan</td><td>${escapeHtml(d.desc||'')}</td><td>${formatRp(d.amount)}</td>`;
+          table_others_overview.prepend(tr);
+        });
+      }catch(e){ console.error('rebuild others overview', e); }
+    }
+
+    /***** TRANSAKSI (realtime) *****/
+    db.ref('transaksi').orderByChild('date').limitToLast(1000).on('value', snap => {
+      table_transaksi.innerHTML = ''; table_recent_kasir.innerHTML = '';
+      const arr = [];
+      snap.forEach(ch => { const d = ch.val(); if(d) arr.push(d); });
+      arr.sort((a,b)=> new Date(b.date) - new Date(a.date)); // newest first
+      arr.forEach(d => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${d.date}</td><td>${escapeHtml(d.payment||d.kind||d.source||'')}</td><td>${escapeHtml(d.desc || (d.items ? d.items.map(i=>i.name+' x'+i.qty).join(', ') : ''))}</td><td>${formatRp(d.amount)}</td><td>${escapeHtml(d.user||'')}</td>`;
+        table_transaksi.appendChild(tr);
+
+        // recent kasir list
+        if(d.source === 'kasir' || d.kind === 'sale'){
+          const tr2 = document.createElement('tr');
+          tr2.innerHTML = `<td>${d.date}</td><td>${escapeHtml(d.desc||'')}</td><td>${formatRp(d.amount)}</td>`;
+          table_recent_kasir.appendChild(tr2);
+        }
+      });
+    });
+
+    /***** BUTTON HOOKS: manual add keuangan utama *****/
+    $('btn_save_main').addEventListener('click', async () => {
+      if(!checkAdmin()) return;
+      const desc = main_desc.value.trim(), type = main_type.value, amount = Number(main_amount.value);
+      if(!desc || !amount) return showToast('Isi data valid');
+      const id = db.ref().child('keuangan_utama').push().key;
+      await db.ref('keuangan_utama/' + id).set({ id, desc, type, amount, date: new Date().toLocaleString(), user: currentUser.email });
+      main_desc.value=''; main_amount.value='';
+      showToast('Tersimpan di keuangan utama');
+    });
+
+    /***** MOVE FROM UTAMA to opr/tab/hpp (admin) *****/
+    btn_move_opr.addEventListener('click', ()=> moveFromMain('keuangan_opr', opr_desc.value, opr_amount.value, 'oprational'));
+    btn_move_tab.addEventListener('click', ()=> moveFromMain('keuangan_tabungan', tab_desc.value, tab_amount.value, 'tabungan'));
+    btn_move_hpp.addEventListener('click', ()=> moveFromMain('keuangan_hpp', hpp_desc.value, hpp_amount.value, 'hpp'));
+
+    async function moveFromMain(targetTable, descInput, amountInput, entryType){
+      if(!checkAdmin()) return;
+      let desc = (descInput || '').trim(); const amount = Number(amountInput);
+      if(!desc || !amount) return showToast('Deskripsi & jumlah valid');
+
+      // compute current balance
+      const snap = await db.ref('keuangan_utama').once('value');
+      let pemasukan=0, pengeluaran=0, opr=0, hpp=0;
+      snap.forEach(ch => {
+        const d = ch.val(); if(!d) return;
+        if(d.type === 'pemasukan') pemasukan += Number(d.amount||0);
+        else if(d.type === 'oprational') opr += Number(d.amount||0);
+        else if(d.type === 'hpp') hpp += Number(d.amount||0);
+        else pengeluaran += Number(d.amount||0);
+      });
+      const sisa = pemasukan - (pengeluaran + opr + hpp);
+      if(sisa < amount) return showToast('Saldo utama tidak cukup');
+
+      // add to target table
+      const idTarget = db.ref().child(targetTable).push().key;
+      const now = new Date().toLocaleString();
+      await db.ref(`${targetTable}/${idTarget}`).set({ id: idTarget, desc, amount, date: now, user: currentUser.email });
+
+      // create pengeluaran record in keuangan_utama so balance reduces
+      const idUt = db.ref().child('keuangan_utama').push().key;
+      const typeForMain = entryType === 'oprational' ? 'oprational' : (entryType === 'hpp' ? 'hpp' : 'pengeluaran');
+      await db.ref(`keuangan_utama/${idUt}`).set({ id: idUt, desc: `Pindah→${targetTable.replace('keuangan_','')} - ${desc}`, type: typeForMain, amount, date: now, user: currentUser.email, refTarget: idTarget });
+
+      // create a small transaction record for audit trail
+      const txId = db.ref().child('transaksi').push().key;
+      await db.ref(`transaksi/${txId}`).set({ id: txId, date: now, amount, desc: `Pindah→${targetTable.replace('keuangan_','')} - ${desc}`, user: currentUser.email, kind: 'pindah', target: targetTable });
+
+      // clear inputs
+      if(targetTable === 'keuangan_opr'){ opr_desc.value = ''; opr_amount.value = ''; }
+      if(targetTable === 'keuangan_tabungan'){ tab_desc.value = ''; tab_amount.value = ''; }
+      if(targetTable === 'keuangan_hpp'){ hpp_desc.value = ''; hpp_amount.value = ''; }
+      showToast('Berhasil memindahkan dari Utama');
+    }
+
+    /***** FILTER & EXPORT HANDLERS *****/
+    btnApplyFilter.addEventListener('click', async () => {
+      const from = filter_from.value, to = filter_to.value;
+      if(!from || !to) return showToast('Pilih rentang tanggal');
+      const snap = await db.ref('transaksi').once('value');
+      table_transaksi.innerHTML = '';
+      snap.forEach(ch => {
+        const d = ch.val(); if(!d || !d.date) return;
+        const dt = new Date(d.date), f = new Date(from), t = new Date(to); t.setHours(23,59,59,999);
+        if(dt >= f && dt <= t){
+          const tr = document.createElement('tr');
+          tr.innerHTML = `<td>${d.date}</td><td>${escapeHtml(d.payment || d.kind || d.source || '')}</td><td>${escapeHtml(d.desc || '')}</td><td>${formatRp(d.amount)}</td><td>${escapeHtml(d.user||'')}</td>`;
+          table_transaksi.prepend(tr);
+        }
+      });
+      showToast('Filter diterapkan');
+    });
+
+    btnExportCsv.addEventListener('click', async () => {
+      try{
+        const [utama, opr, tab, hpp, tx, prd] = await Promise.all([
+          db.ref('keuangan_utama').once('value'),
+          db.ref('keuangan_opr').once('value'),
+          db.ref('keuangan_tabungan').once('value'),
+          db.ref('keuangan_hpp').once('value'),
+          db.ref('transaksi').once('value'),
+          db.ref('produk').once('value')
+        ]);
+        let csv = 'Tabel,ID,Tanggal,Deskripsi,Jenis,Jumlah,User\n';
+        utama.forEach(s => { const d = s.val(); csv += `keuangan_utama,${d.id},${d.date},${escapeCsv(d.desc)},${escapeCsv(d.type)},${d.amount},${escapeCsv(d.user)}\n`; });
+        opr.forEach(s => { const d = s.val(); csv += `keuangan_opr,${d.id},${d.date},${escapeCsv(d.desc)},operasional,${d.amount},${escapeCsv(d.user)}\n`; });
+        tab.forEach(s => { const d = s.val(); csv += `keuangan_tabungan,${d.id},${d.date},${escapeCsv(d.desc)},tabungan,${d.amount},${escapeCsv(d.user)}\n`; });
+        hpp.forEach(s => { const d = s.val(); csv += `keuangan_hpp,${d.id},${d.date},${escapeCsv(d.desc)},hpp,${d.amount},${escapeCsv(d.user)}\n`; });
+        tx.forEach(s => { const d = s.val(); csv += `transaksi,${d.id},${d.date},${escapeCsv(d.desc)},${escapeCsv(d.kind||d.source)},${d.amount},${escapeCsv(d.user)}\n`; });
+        prd.forEach(s => { const d = s.val(); csv += `produk,${d.id},,${escapeCsv(d.name)},modal:${d.cost},jual:${d.price}\n`; });
+        const blob = new Blob([csv], { type: 'text/csv' }); const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = url; a.download = 'data_keuangan.csv'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+        showToast('Export selesai');
+      } catch(err){ console.error(err); showToast('Export gagal'); }
+    });
+
+    // KASIR: Add / render cart
+    // ... (cart handlers outside)
+  } // end attachListeners
+
+  // CART & KASIR
+  function addToCart(productId, qty = 1){
+    const p = PRODUCTS[productId];
+    if(!p) return showToast('Produk tidak tersedia');
+    const found = CART.find(i => i.id === productId);
+    if(found) found.qty += qty; else CART.push({ id: productId, name: p.name, price: Number(p.price), cost: Number(p.cost), qty });
+    renderCart();
+  }
+
+  function renderCart(){
+    cart_table.innerHTML = ''; let total = 0, totalHpp = 0;
+    CART.forEach((it, idx) => {
+      const sub = it.price * it.qty; total += sub; totalHpp += (it.cost * it.qty);
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${escapeHtml(it.name)}</td><td><input class="qty" data-idx="${idx}" type="number" min="1" value="${it.qty}" style="width:70px"/></td><td>${formatRp(it.price)}</td><td>${formatRp(sub)}</td><td><button class="btn rem" data-idx="${idx}" style="padding:6px">Hapus</button></td>`;
+      cart_table.appendChild(tr);
+    });
+
+    // handlers for qty change & remove
+    cart_table.querySelectorAll('.qty').forEach(inp => inp.addEventListener('change', e => {
+      const idx = Number(e.target.dataset.idx); const v = Number(e.target.value); if(v <= 0) return;
+      CART[idx].qty = v; renderCart();
+    }));
+    cart_table.querySelectorAll('.rem').forEach(b => b.addEventListener('click', e => {
+      const idx = Number(e.target.dataset.idx); CART.splice(idx, 1); renderCart();
+    }));
+
+    cart_total.textContent = formatRp(total);
+    cart_gross.textContent = formatRp(total);
+    cart_hpp.textContent = formatRp(totalHpp);
+    cart_net.textContent = formatRp(total - totalHpp);
+  }
+
+  $('btn_clear_cart').addEventListener('click', ()=> { CART = []; renderCart(); });
+
+  $('btn_checkout').addEventListener('click', async () => {
+    if(!currentUser) return showToast('Harap login');
+    if(CART.length === 0) return showToast('Keranjang kosong');
+    const method = pay_method.value;
+    const total = CART.reduce((s,i) => s + (i.price * i.qty), 0);
+    const totalHpp = CART.reduce((s,i) => s + (i.cost * i.qty), 0);
+    try {
+      const txId = db.ref().child('transaksi').push().key;
+      const tx = { id: txId, date: new Date().toLocaleString(), items: CART, amount: total, hpp: totalHpp, user: currentUser.email, payment: method, source: 'kasir', desc: CART.map(i=>i.name + ' x' + i.qty).join(', ') };
+      await db.ref('transaksi/' + txId).set(tx);
+
+      // add pemasukan to keuangan_utama
+      const idIn = db.ref().child('keuangan_utama').push().key;
+      await db.ref('keuangan_utama/' + idIn).set({ id: idIn, desc: 'Penjualan (Kasir) - ' + txId, type: 'pemasukan', amount: total, date: new Date().toLocaleString(), user: currentUser.email, txRef: txId });
+
+      // add HPP & pengeluaran main for HPP (so balance reduces)
+      if(totalHpp > 0){
+        const idHpp = db.ref().child('keuangan_hpp').push().key;
+        await db.ref('keuangan_hpp/' + idHpp).set({ id: idHpp, desc: 'HPP - ' + txId, amount: totalHpp, date: new Date().toLocaleString(), user: currentUser.email, txRef: txId });
+        const idOut = db.ref().child('keuangan_utama').push().key;
+        await db.ref('keuangan_utama/' + idOut).set({ id: idOut, desc: 'HPP - ' + txId, type: 'hpp', amount: totalHpp, date: new Date().toLocaleString(), user: currentUser.email, refHpp: idHpp });
+      }
+
+      CART = []; renderCart(); showToast('Checkout berhasil');
+    } catch(err){ console.error(err); showToast('Checkout gagal'); }
+  });
+
+  // DAILY COMPUTE & CHARTS
+  async function computeAndRenderDaily(){
+    try{
+      const snap = await db.ref('transaksi').once('value');
+      const byDate = {};
+      snap.forEach(ch => {
+        const d = ch.val(); if(!d) return;
+        const dt = new Date(d.date || Date.now());
+        const dateKey = dt.toLocaleDateString();
+        if(!byDate[dateKey]) byDate[dateKey] = { gross: 0, net: 0 };
+        if(d.items && Array.isArray(d.items)){
+          d.items.forEach(it => {
+            const qty = Number(it.qty || 0), price = Number(it.price || 0), cost = Number(it.cost || 0);
+            byDate[dateKey].gross += price * qty;
+            byDate[dateKey].net += (price - cost) * qty;
+          });
+        } else {
+          // fallback: if tx has amount only
+          byDate[dateKey].gross += Number(d.amount || 0);
+        }
+      });
+
+      const arr = Object.keys(byDate).map(k => ({ date: k, gross: byDate[k].gross, net: byDate[k].net }));
+      arr.sort((a,b) => new Date(a.date) - new Date(b.date)); // asc
+      const recent = arr.slice(-7); // last 7 days
+
+      // render table
+      table_daily.innerHTML = '';
+      recent.slice().reverse().forEach(r => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${r.date}</td><td>${formatRp(r.gross)}</td><td>${formatRp(r.net)}</td>`;
+        table_daily.prepend(tr);
+      });
+
+      // chart
+      if(chartDaily) chartDaily.destroy();
+      if(chartDailyCtx){
+        const labels = recent.map(r => r.date);
+        const dataGross = recent.map(r => r.gross);
+        const dataNet = recent.map(r => r.net);
+        chartDaily = new Chart(chartDailyCtx, {
+          type: 'bar',
+          data: {
+            labels,
+            datasets: [
+              { label: 'Pendapatan Kotor', data: dataGross, backgroundColor: '#ff9fc4' },
+              { label: 'Pendapatan Bersih', data: dataNet, backgroundColor: '#ff85c1' }
+            ]
+          },
+          options: { responsive: true, scales:{ y: { beginAtZero: true } } }
+        });
+      }
+
+    } catch(err){ console.error('daily compute error', err); }
+  }
+
+  function updateChartSummary(pemasukan, pengeluaran, opr, hpp, sisa){
+    const labels = ['Pemasukan','Pengeluaran','Operasional','HPP','Sisa'];
+    const data = [pemasukan, pengeluaran, opr, hpp, sisa];
+    if(chartSummary) chartSummary.destroy();
+    chartSummary = new Chart(chartSummaryCtx, {
+      type: 'bar',
+      data: { labels, datasets: [{ label: 'Rp', data, backgroundColor: ['#bfe9ff','#ff9fc4','#ff85c1','#ffb6d6','#a6c1ee'] }] },
+      options: { responsive:true, plugins:{legend:{display:false}}, scales:{ y: { beginAtZero:true } } }
+    });
+  }
+
+  function escapeCsv(s){ if(s==null) return ''; s = String(s); if(s.includes(',') || s.includes('"') || s.includes('\n')) return '"' + s.replace(/"/g,'""') + '"'; return s; }
+
+  // TABS: finance tabs & tabpanel toggling
+  (function initFinanceTabs(){
+    const tabBtns = Array.from(document.querySelectorAll('#financeTabs .tabbtn'));
+    const panels = Array.from(document.querySelectorAll('.tabpanel'));
+    function activate(tabBtn){
+      tabBtns.forEach(b => { b.classList.remove('active'); b.setAttribute('aria-selected','false'); });
+      panels.forEach(p => p.classList.add('hidden'), p => p.setAttribute('aria-hidden','true'));
+      const tab = tabBtn.dataset.tab;
+      tabBtn.classList.add('active');
+      tabBtn.setAttribute('aria-selected','true');
+      const panel = document.getElementById(tab);
+      if(panel){ panel.classList.remove('hidden'); panel.setAttribute('aria-hidden','false'); }
+      // Scroll into view small optimization
+      panel?.scrollIntoView({ behavior:'smooth', block:'start' });
+    }
+    tabBtns.forEach(b => b.addEventListener('click', ()=> activate(b)));
+    // keyboard access (arrow left/right)
+    document.querySelector('#financeTabs')?.addEventListener('keydown', (e) => {
+      const idx = tabBtns.findIndex(t => t.classList.contains('active'));
+      if(e.key === 'ArrowRight') tabBtns[(idx+1)%tabBtns.length].focus();
+      if(e.key === 'ArrowLeft') tabBtns[(idx-1+tabBtns.length)%tabBtns.length].focus();
+    });
+  })();
+
+  // initial view
+  showOnly('login');
+
+  // global error logger
+  window.addEventListener('error', e => { console.error(e); showToast('Error (cek console)'); });
+
+  </script>
+</body>
+</html>
