@@ -17,35 +17,36 @@
       --pink: #ff85c1;
       --pink-2: #ffb6d6;
       --accent: #e18fb8;
-      --card-shadow: 0 8px 30px rgba(0,0,0,0.55);
+      --card-shadow: 0 10px 30px rgba(2,6,23,0.6);
       --glass-border: rgba(255,255,255,0.03);
       --max-width: 1200px;
+      --modal-bg: rgba(3,6,12,0.6);
+      --surface: #0f1722;
+      --surface-2: #111827;
+      --white-soft: #f7f9fb;
     }
 
-    /* Reset + base */
     *{box-sizing:border-box;margin:0;padding:0}
     html,body{height:100%}
     body{
       background: linear-gradient(180deg, #07121a 0%, var(--bg) 100%);
       font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-      color: #e6eef8;
+      color: var(--white-soft);
       -webkit-font-smoothing:antialiased;
       -moz-osx-font-smoothing:grayscale;
       line-height:1.35;
       padding: 12px;
     }
 
-    /* App wrapper - center + responsive max width */
     .app-wrap{
       max-width: var(--max-width);
       margin: 6px auto;
       display: grid;
-      grid-template-columns: 260px 1fr; /* sidebar + main */
+      grid-template-columns: 260px 1fr;
       gap: 16px;
       align-items: start;
     }
 
-    /* SIDEBAR */
     .sidebar{
       background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.00));
       border-radius: 12px;
@@ -64,7 +65,7 @@
     .small{font-size:13px;color:var(--muted)}
     .nav{display:flex;flex-direction:column;gap:8px;margin-top:6px}
     .nav button{
-      background:transparent;border:0;color:#e6eef8;padding:10px 12px;border-radius:8px;text-align:left;cursor:pointer;
+      background:transparent;border:0;color:var(--white-soft);padding:10px 12px;border-radius:8px;text-align:left;cursor:pointer;
       transition:all .12s;font-weight:600;
     }
     .nav button:hover{background:rgba(255,255,255,0.02)}
@@ -73,28 +74,15 @@
     .btn-ghost{background:transparent;border:1px solid rgba(255,255,255,0.04);padding:8px;border-radius:8px;color:var(--muted);cursor:pointer}
     .badge{background:rgba(255,255,255,0.03);padding:6px 8px;border-radius:8px;font-weight:600;color:var(--pink)}
 
-    /* MAIN */
-    .main{
-      display:flex;
-      flex-direction:column;
-      gap:12px;
-      min-height: calc(100vh - 48px);
-    }
-    .topbar{
-      display:flex;justify-content:space-between;align-items:center;gap:12px;
-    }
-    .card{
-      background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.00));
-      border-radius: 12px;
-      padding: 14px;
-      box-shadow: var(--card-shadow);
-      border: 1px solid var(--glass-border);
-    }
+    .main{display:flex;flex-direction:column;gap:12px;min-height: calc(100vh - 48px);}
+    .topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;}
+    .card{background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.00));border-radius: 12px;padding: 14px;box-shadow: var(--card-shadow);border: 1px solid var(--glass-border);}
     .row{display:flex;gap:12px;flex-wrap:wrap}
     .col{flex:1;min-width:220px}
-    input,select,textarea{width:100%;padding:8px;border-radius:8px;border:1px solid var(--glass-border);background:transparent;color:#e6eef8}
+    input,select,textarea{width:100%;padding:8px;border-radius:8px;border:1px solid var(--glass-border);background:transparent;color:var(--white-soft)}
+    .input-plain{background:transparent;border:1px solid rgba(255,255,255,0.03);padding:8px;border-radius:8px;color:var(--white-soft)}
     button.btn{background:linear-gradient(90deg,var(--pink),var(--pink-2));border:none;color:#071127;padding:8px 12px;border-radius:8px;cursor:pointer}
-    button.btn.secondary{background:#1b2430;color:#e6eef8}
+    button.btn.secondary{background:#1b2430;color:var(--white-soft)}
     table{width:100%;border-collapse:collapse;margin-top:8px;font-size:13px}
     th,td{padding:8px;border-bottom:1px solid rgba(255,255,255,0.03);color:#dff0ff;text-align:left}
     th{color:var(--muted);font-weight:600}
@@ -103,19 +91,15 @@
     .muted{color:var(--muted)}
     .hidden{display:none!important}
 
-    /* Tabs within dashboard */
     .tabs{display:flex;gap:8px;border-bottom:1px solid rgba(255,255,255,0.03);padding-bottom:8px;margin-bottom:10px;flex-wrap:wrap}
     .tabbtn{background:transparent;border:0;color:var(--muted);padding:8px 12px;border-radius:8px;cursor:pointer}
     .tabbtn.active{color:var(--pink);background:rgba(255,255,255,0.02)}
 
-    /* Toast */
     .toast{position:fixed;right:18px;bottom:18px;background:var(--pink);color:#071127;padding:10px 14px;border-radius:10px;z-index:9999;opacity:0;transform:translateY(6px);transition:all .28s}
     .toast.show{opacity:1;transform:translateY(0)}
 
-    /* Product card (kasir) */
-    .product-card{padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.02);display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+    .product-card{padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.02);display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.00))}
 
-    /* small responsive tweaks */
     @media (max-width: 1100px){
       .app-wrap{grid-template-columns: 1fr; padding-bottom: 12px}
       .sidebar{height:auto;position:relative;display:flex;flex-direction:row;align-items:center;gap:12px;padding:10px}
@@ -124,7 +108,6 @@
       .sidebar .meta{display:none}
     }
 
-    /* mobile-first strong responsiveness */
     @media (max-width: 720px){
       body{padding:8px}
       .card{padding:10px}
@@ -136,22 +119,32 @@
       .product-card > div:last-child{align-self:stretch;display:flex;justify-content:space-between}
     }
 
-    /* small helpers */
-    .small-quiet{font-size:12px;color:var(--muted)}
+    /* Modal - pure CSS/JS */
+    .modal-backdrop{position:fixed;inset:0;background:var(--modal-bg);display:none;align-items:center;justify-content:center;z-index:2000;padding:18px}
+    .modal{background:linear-gradient(180deg,#0b1220,#0f1722);border-radius:12px;padding:16px;min-width:280px;max-width:720px;width:100%;box-shadow:0 20px 50px rgba(2,6,23,0.7);border:1px solid var(--glass-border)}
+    .modal h3{margin-bottom:10px;color:var(--pink)}
+    .modal .row{margin-top:6px}
+    .modal .actions{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
+    .modal.show{animation:modalIn .18s ease}
+    @keyframes modalIn{from{transform:translateY(8px);opacity:0}to{transform:translateY(0);opacity:1}}
+
+    .search-wrap{display:flex;gap:8px;align-items:center}
+    .search-input{padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);background:transparent;color:var(--white-soft);min-width:0}
+
     .table-wrap{overflow:auto;max-width:100%}
+    .small-quiet{font-size:12px;color:var(--muted)}
+    .muted-2{color:rgba(255,255,255,0.6)}
   </style>
 </head>
 <body>
 
   <div class="app-wrap" id="appWrap">
-    <!-- SIDEBAR -->
     <aside class="sidebar" id="sidebar" aria-label="Sidebar">
       <div style="display:flex;flex-direction:column;gap:6px">
         <div class="brand">💖 Jeda Keuangan</div>
         <div class="small">Dark Soft • Admin + Kasir</div>
       </div>
 
-      <!-- navigation items (top-level) -->
       <div class="nav" id="nav" role="navigation" aria-label="Main navigation">
         <button id="nav_dashboard" class="active" aria-controls="view_dashboard">📊 Dashboard</button>
         <button id="nav_kasir" aria-controls="view_kasir">🛒 Kasir</button>
@@ -159,7 +152,6 @@
         <button id="nav_keuangan" aria-controls="view_keuangan">💼 Keuangan</button>
       </div>
 
-      <!-- meta / user info at bottom of sidebar -->
       <div class="meta">
         <div class="small">Masuk sebagai</div>
         <div id="userEmail" style="font-weight:700;word-break:break-all;margin-top:6px">-</div>
@@ -169,9 +161,7 @@
       </div>
     </aside>
 
-    <!-- MAIN -->
     <main class="main">
-      <!-- TOPBAR -->
       <div class="topbar">
         <div>
           <h2 style="margin:0;color:var(--pink)">Dashboard & Kasir</h2>
@@ -182,7 +172,7 @@
         </div>
       </div>
 
-      <!-- LOGIN VIEW -->
+      <!-- LOGIN -->
       <section id="view_login" class="card">
         <h3 style="color:var(--pink);margin-bottom:8px">Login</h3>
         <div class="row">
@@ -208,9 +198,8 @@
         </div>
       </section>
 
-      <!-- DASHBOARD (ADMIN) -->
+      <!-- DASHBOARD -->
       <section id="view_dashboard" class="card hidden" aria-live="polite">
-        <!-- top summary cards -->
         <div class="row">
           <div class="col card">
             <div class="kicker muted">Pendapatan Kotor (total)</div>
@@ -229,13 +218,11 @@
           </div>
         </div>
 
-        <!-- summary chart -->
         <div class="card" style="margin-top:12px">
           <h4 style="color:var(--pink);margin:0 0 8px 0">Grafik Ringkasan</h4>
           <canvas id="chartSummary" style="max-height:320px"></canvas>
         </div>
 
-        <!-- tabs for different financial tables -->
         <div class="card" style="margin-top:12px">
           <div class="tabs" id="financeTabs" role="tablist" aria-label="Tab Keuangan">
             <button class="tabbtn active" data-tab="tab_utama" role="tab" aria-selected="true">Keuangan Utama</button>
@@ -245,7 +232,7 @@
             <button class="tabbtn" data-tab="tab_laporan" role="tab" aria-selected="false">Laporan</button>
           </div>
 
-          <!-- TAB: Keuangan Utama -->
+          <!-- tab content (same as sebelumnya) -->
           <div id="tab_utama" class="tabpanel" role="tabpanel">
             <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
               <div style="flex:1;min-width:240px">
@@ -267,7 +254,6 @@
             </div>
           </div>
 
-          <!-- TAB: Operasional -->
           <div id="tab_opr" class="tabpanel hidden" role="tabpanel" aria-hidden="true">
             <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
               <input id="opr_desc" placeholder="Deskripsi operasional"/>
@@ -279,7 +265,6 @@
             </div>
           </div>
 
-          <!-- TAB: HPP / Belanja -->
           <div id="tab_hpp" class="tabpanel hidden" role="tabpanel" aria-hidden="true">
             <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
               <input id="hpp_desc" placeholder="Deskripsi belanja / HPP"/>
@@ -291,7 +276,6 @@
             </div>
           </div>
 
-          <!-- TAB: Tabungan -->
           <div id="tab_tab" class="tabpanel hidden" role="tabpanel" aria-hidden="true">
             <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
               <input id="tab_desc" placeholder="Deskripsi tabungan"/>
@@ -303,7 +287,6 @@
             </div>
           </div>
 
-          <!-- TAB: Laporan (daily + transaksi) -->
           <div id="tab_laporan" class="tabpanel hidden" role="tabpanel" aria-hidden="true">
             <div class="row">
               <div class="col">
@@ -331,21 +314,28 @@
         </div>
       </section>
 
-      <!-- PRODUCTS (Admin) -->
+      <!-- PRODUCTS -->
       <section id="view_products" class="card hidden">
-        <h4 style="color:var(--pink);margin:0 0 8px 0">Produk (Admin)</h4>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <input id="prod_name" placeholder="Nama produk" style="flex:1;min-width:160px"/>
-          <input id="prod_cost" placeholder="Harga modal" type="number" style="width:150px"/>
-          <input id="prod_price" placeholder="Harga jual" type="number" style="width:150px"/>
-          <button id="btn_add_product" class="btn">Tambah</button>
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+          <div>
+            <h4 style="color:var(--pink);margin:0 0 8px 0">Produk (Admin)</h4>
+            <div class="small-quiet">Tambah, edit, hapus. Data tersimpan ke Firebase.</div>
+          </div>
+
+          <div style="display:flex;gap:8px;align-items:center;min-width:240px;flex:1;justify-content:flex-end">
+            
+            <button id="btnOpenAdd" class="btn">+ Produk</button>
+          </div>
         </div>
+
         <div style="margin-top:12px;max-height:360px;overflow:auto" class="table-wrap">
           <table id="table_products"><thead><tr><th>Nama</th><th>Modal</th><th>Jual</th><th>Aksi</th></tr></thead><tbody></tbody></table>
         </div>
+
+        
       </section>
 
-      <!-- KEUANGAN OVERVIEW (Admin) -->
+      <!-- KEUANGAN OVERVIEW -->
       <section id="view_keuangan" class="card hidden">
         <h4 style="color:var(--pink);margin:0 0 8px 0">Keuangan Overview</h4>
         <div class="row">
@@ -369,6 +359,10 @@
         <div class="row">
           <div style="flex:0 0 420px;min-width:260px" class="card">
             <h4 style="color:var(--pink);margin:0 0 8px 0">Daftar Produk</h4>
+            <div style="margin-bottom:8px" class="small-quiet">Gunakan search pada tab Produk untuk memfilter juga area kasir.</div>
+            <div class="search-wrap" style="flex:1;min-width:160px">
+              <input id="productSearch" class="search-input" placeholder="Cari produk..." />
+            </div>
             <div id="products_container" style="max-height:420px;overflow:auto"></div>
             <div style="margin-top:8px" class="kicker muted">Klik "Tambah" untuk memasukkan ke keranjang</div>
           </div>
@@ -415,13 +409,26 @@
   <!-- TOAST -->
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
+  <!-- MODAL markup -->
+  <div id="modalBackdrop" class="modal-backdrop" tabindex="-1" aria-hidden="true">
+    <div id="modalBox" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <!-- content set dynamically -->
+      <h3 id="modalTitle">Modal</h3>
+      <div id="modalBody"></div>
+      <div class="actions" style="margin-top:8px;display:flex;gap:8px;justify-content:flex-end">
+        <button id="modalCancel" class="btn secondary">Batal</button>
+        <button id="modalSave" class="btn">Simpan</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Firebase compat libraries -->
   <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-database-compat.js"></script>
 
   <script>
-  /***** CONFIG - sesuaikan jika perlu *****/
+  /***** Config (jangan lupa sesuaikan bila perlu) *****/
   const firebaseConfig = {
     apiKey: "AIzaSyAkbJYrKPcsmzwhDewt7NAZUs8rUtRl-NY",
     authDomain: "jeda-voice.firebaseapp.com",
@@ -433,16 +440,14 @@
     measurementId: "G-VM1H1R3J0S"
   };
 
-  // Users lists (sesuaikan)
   const ADMIN_EMAILS = ["shysondiamond@gmail.com"];
   const KASIR_EMAILS = ["aldoefendi55@gmail.com"];
 
-  // Initialize Firebase
   firebase.initializeApp(firebaseConfig);
   const auth = firebase.auth();
   const db = firebase.database();
 
-  // UI helpers
+  // helpers
   const $ = id => document.getElementById(id);
   const showToast = (msg, t = 2400) => {
     const el = $('toast'); el.textContent = msg; el.classList.add('show');
@@ -451,7 +456,7 @@
   const formatRp = n => 'Rp ' + Number(n || 0).toLocaleString();
   const escapeHtml = s => s ? String(s).replace(/[&<>"'`=\/]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','/':'&#x2F;','`':'&#x60;','=':'&#x3D;'})[c]) : '';
 
-  // DOM refs
+  // dom refs
   const views = {
     login: $('view_login'),
     adminChoices: $('view_admin_choices'),
@@ -464,35 +469,36 @@
     dashboard: $('nav_dashboard'), kasir: $('nav_kasir'), products: $('nav_products'), keuangan: $('nav_keuangan')
   };
 
-  // login
   const login_email = $('login_email'), login_pass = $('login_pass'), btnLogin = $('btnLogin'), btnClear = $('btnClear'), login_msg = $('login_msg');
   const btnSignOut = $('btnSignOut'), userEmailEl = $('userEmail'), roleLabel = $('roleLabel');
 
-  // dashboard elements
+  // products
+  const table_products = document.querySelector('#table_products tbody');
+  const products_container = $('products_container');
+  const productSearch = $('productSearch');
+  const btnOpenAdd = $('btnOpenAdd');
+
+  // modal
+  const modalBackdrop = $('modalBackdrop'), modalBox = $('modalBox'), modalBody = $('modalBody'), modalTitle = $('modalTitle');
+  const modalCancel = $('modalCancel'), modalSave = $('modalSave');
+
+  // cart
+  const cart_table = document.querySelector('#cart_table tbody'), cart_total = $('cart_total'), cart_gross = $('cart_gross'), cart_net = $('cart_net'), cart_hpp = $('cart_hpp');
+  const btn_checkout = $('btn_checkout'), btn_clear_cart = $('btn_clear_cart'), pay_method = $('pay_method');
+
+  // keuangan refs (keperluan tetap)
   const gross_income = $('gross_income'), net_income = $('net_income'), balanceEl = $('balance');
   const table_keuangan_utama = document.querySelector('#table_keuangan_utama tbody');
   const table_keuangan_utama_overview = document.querySelector('#table_keuangan_utama_overview tbody');
   const table_opr = document.querySelector('#table_opr tbody'), table_hpp = document.querySelector('#table_hpp tbody'), table_tabungan = document.querySelector('#table_tabungan tbody');
   const table_others_overview = document.querySelector('#table_others_overview tbody');
-  const table_products = document.querySelector('#table_products tbody'), products_container = $('products_container');
-  const prod_name = $('prod_name'), prod_cost = $('prod_cost'), prod_price = $('prod_price'), btn_add_product = $('btn_add_product');
 
-  // main manual fields
-  const main_desc = $('main_desc'), main_type = $('main_type'), main_amount = $('main_amount'), btn_save_main = $('btn_save_main');
-  const opr_desc = $('opr_desc'), opr_amount = $('opr_amount'), btn_move_opr = $('btn_move_opr');
-  const hpp_desc = $('hpp_desc'), hpp_amount = $('hpp_amount'), btn_move_hpp = $('btn_move_hpp');
-  const tab_desc = $('tab_desc'), tab_amount = $('tab_amount'), btn_move_tab = $('btn_move_tab');
-
-  // transactions / daily
+  // transaksi/daily
   const table_transaksi = document.querySelector('#table_transaksi tbody');
   const table_daily = document.querySelector('#table_daily tbody');
   const table_recent_kasir = document.querySelector('#table_recent_kasir tbody');
 
-  // cart / kasir
-  const cart_table = document.querySelector('#cart_table tbody'), cart_total = $('cart_total'), cart_gross = $('cart_gross'), cart_net = $('cart_net'), cart_hpp = $('cart_hpp');
-  const btn_checkout = $('btn_checkout'), btn_clear_cart = $('btn_clear_cart'), pay_method = $('pay_method');
-
-  // other buttons
+  // other UI
   const btnExportCsv = $('btnExportCsv'), btnApplyFilter = $('btnApplyFilter'), filter_from = $('filter_from'), filter_to = $('filter_to');
 
   // charts
@@ -501,11 +507,12 @@
   const chartDailyCtx = document.getElementById('chartDaily') ? document.getElementById('chartDaily').getContext('2d') : null;
   let chartDaily = null;
 
-  // app state
+  // state
   let currentUser = null, isAdmin = false;
   let PRODUCTS = {}, CART = [];
+  let attached = false;
 
-  // AUTH & NAV
+  // auth
   btnLogin.addEventListener('click', ()=> {
     const email = login_email.value.trim(), pass = login_pass.value;
     if(!email || !pass){ login_msg.textContent = 'Isi email & password'; return; }
@@ -520,25 +527,19 @@
   auth.onAuthStateChanged(user => {
     currentUser = user;
     if(!user){
-      // not logged in => show login
       showOnly('login');
       userEmailEl.textContent = '-';
       roleLabel.textContent = '-';
-      // clear any previously attached realtime listeners? (not implemented - small apps ok)
       return;
     }
-    // logged in => determine role
     userEmailEl.textContent = user.email;
     isAdmin = ADMIN_EMAILS.includes(user.email);
     roleLabel.textContent = isAdmin ? 'Admin' : 'Kasir';
-
-    // admin sees choice, kasir sees kasir directly
     if(isAdmin) showOnly('adminChoices'); else showOnly('kasir');
-
-    attachListeners(); // attach on first login
+    attachListeners();
   });
 
-  // sidebar nav actions + active state
+  // sidebar nav
   function setSidebarActive(key){
     Object.values(navButtons).forEach(b => b.classList.remove('active'));
     if(navButtons[key]) navButtons[key].classList.add('active');
@@ -556,84 +557,45 @@
     if(views[key]) views[key].classList.remove('hidden');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
-
   function checkAdmin(){
     if(!currentUser){ showToast('Harap login'); return false; }
     if(!isAdmin){ showToast('Hanya admin yang boleh'); return false; }
     return true;
   }
 
-  /***** Attach listeners & realtime sync *****/
-  let attached = false;
+  /***** Attach realtime listeners & UI handlers *****/
   function attachListeners(){
     if(attached) return;
     attached = true;
 
-    /***** PRODUCTS (realtime) *****/
+    // PRODUCTS realtime
     db.ref('produk').on('value', snap => {
       PRODUCTS = {}; table_products.innerHTML = ''; products_container.innerHTML = '';
       snap.forEach(ch => {
         const p = ch.val(); if(!p) return;
         PRODUCTS[ch.key] = p;
-
-        // table row for admin product management
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${escapeHtml(p.name)}</td><td>${formatRp(p.cost)}</td><td>${formatRp(p.price)}</td>
-          <td>
-            <button class="btn small edit" data-id="${ch.key}" style="padding:6px">Edit</button>
-            <button class="btn small del" data-id="${ch.key}" style="padding:6px;background:#1a2330;color:#e7eef8">Hapus</button>
-          </td>`;
-        table_products.appendChild(tr);
-
-        // product card for kasir list
-        const div = document.createElement('div'); div.className = 'product-card';
-        div.innerHTML = `<div>
-            <div style="font-weight:600">${escapeHtml(p.name)}</div>
-            <div class="kicker muted">Jual: ${formatRp(p.price)} • Modal: ${formatRp(p.cost)}</div>
-          </div>
-          <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">
-            <button class="btn add-to-cart" data-id="${ch.key}" style="padding:6px">Tambah</button>
-            ${ isAdmin ? `<button class="btn edit-card" data-id="${ch.key}" style="padding:6px;background:#1a2330;color:#e7eef8">Edit</button>` : '' }
-          </div>`;
-        products_container.appendChild(div);
       });
 
-      // attach event handlers (delegated)
-      table_products.querySelectorAll('.edit').forEach(b => b.addEventListener('click', async e => {
-        if(!checkAdmin()) return;
-        const id = e.target.dataset.id; const p = PRODUCTS[id];
-        const name = prompt('Nama produk', p.name); const cost = prompt('Harga modal', p.cost); const price = prompt('Harga Jual', p.price);
-        if(!name || !cost || !price) return;
-        await db.ref('produk/' + id).update({ name, cost: Number(cost), price: Number(price) });
-        showToast('Produk diperbarui');
-      }));
-      table_products.querySelectorAll('.del').forEach(b => b.addEventListener('click', async e => {
-        if(!checkAdmin()) return;
-        const id = e.target.dataset.id; if(!confirm('Hapus produk?')) return;
-        await db.ref('produk/' + id).remove(); showToast('Produk dihapus');
-      }));
-
-      products_container.querySelectorAll('.add-to-cart').forEach(b => b.addEventListener('click', e => addToCart(e.target.dataset.id, 1)));
-      products_container.querySelectorAll('.edit-card').forEach(b => b.addEventListener('click', async e => {
-        if(!checkAdmin()) return;
-        const id = e.target.dataset.id; const p = PRODUCTS[id];
-        const name = prompt('Nama produk', p.name); const cost = prompt('Modal', p.cost); const price = prompt('Harga Jual', p.price);
-        if(!name || !cost || !price) return;
-        await db.ref('produk/' + id).update({ name, cost: Number(cost), price: Number(price) });
-        showToast('Produk diperbarui');
-      }));
+      // render (apply search filter)
+      renderProductsUI(productSearch.value || '');
     });
 
-    // add product (admin)
-    btn_add_product.addEventListener('click', async () => {
+    // product add button opens modal (add)
+    btnOpenAdd.addEventListener('click', ()=> {
       if(!checkAdmin()) return;
-      const name = prod_name.value.trim(), cost = Number(prod_cost.value), price = Number(prod_price.value);
-      if(!name || !cost || !price) return showToast('Isi data produk lengkap');
-      const id = db.ref().child('produk').push().key;
-      await db.ref('produk/' + id).set({ id, name, cost, price });
-      prod_name.value=''; prod_cost.value=''; prod_price.value='';
-      showToast('Produk disimpan');
+      openProductModal({ mode: 'add' });
     });
+
+    // search handler (real-time)
+    let searchTimer = null;
+    productSearch.addEventListener('input', (e) => {
+      const q = String(e.target.value || '').trim().toLowerCase();
+      // slight debounce for smoother typing
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(()=> renderProductsUI(q), 120);
+    });
+
+    // add product save handled inside modal submit below
 
     /***** KEUANGAN UTAMA (realtime) *****/
     db.ref('keuangan_utama').on('value', snap => {
@@ -645,7 +607,6 @@
         tr.innerHTML = `<td>${d.date||''}</td><td>${escapeHtml(d.desc||'')}</td><td>${escapeHtml(d.type||'')}</td><td>${formatRp(d.amount)}</td>`;
         table_keuangan_utama.prepend(tr);
         table_keuangan_utama_overview.prepend(tr.cloneNode(true));
-        // categorize (note: types used: pemasukan, oprational, hpp, pengeluaran)
         if(d.type === 'pemasukan') pemasukan += Number(d.amount||0);
         else if(d.type === 'oprational') opr += Number(d.amount||0);
         else if(d.type === 'hpp') hpp += Number(d.amount||0);
@@ -660,42 +621,11 @@
       computeAndRenderDaily();
     });
 
-    /***** KEUANGAN OPERASIONAL, HPP, TABUNGAN listeners *****/
-    db.ref('keuangan_opr').on('value', snap => {
-      table_opr.innerHTML = '';
-      // we clear only others overview in the three listeners to avoid duplicates; instead rebuild later
-      rebuildOthersOverviewAsync();
-      snap.forEach(ch => {
-        const d = ch.val(); if(!d) return;
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${d.date||''}</td><td>${escapeHtml(d.desc||'')}</td><td>${formatRp(d.amount)}</td><td>${escapeHtml(d.user||'')}</td>`;
-        table_opr.prepend(tr);
-      });
-    });
+    // opr/hpp/tabungan listeners and rebuild others overview
+    db.ref('keuangan_opr').on('value', () => rebuildOthersOverviewAsync());
+    db.ref('keuangan_hpp').on('value', () => rebuildOthersOverviewAsync());
+    db.ref('keuangan_tabungan').on('value', () => rebuildOthersOverviewAsync());
 
-    db.ref('keuangan_hpp').on('value', snap => {
-      table_hpp.innerHTML = '';
-      rebuildOthersOverviewAsync();
-      snap.forEach(ch => {
-        const d = ch.val(); if(!d) return;
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${d.date||''}</td><td>${escapeHtml(d.desc||'')}</td><td>${formatRp(d.amount)}</td><td>${escapeHtml(d.user||'')}</td>`;
-        table_hpp.prepend(tr);
-      });
-    });
-
-    db.ref('keuangan_tabungan').on('value', snap => {
-      table_tabungan.innerHTML = '';
-      rebuildOthersOverviewAsync();
-      snap.forEach(ch => {
-        const d = ch.val(); if(!d) return;
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${d.date||''}</td><td>${escapeHtml(d.desc||'')}</td><td>${formatRp(d.amount)}</td><td>${escapeHtml(d.user||'')}</td>`;
-        table_tabungan.prepend(tr);
-      });
-    });
-
-    // small helper to rebuild others overview (collects opr/hpp/tabungan as separate queries)
     async function rebuildOthersOverviewAsync(){
       try{
         const [oprSnap, hppSnap, tabSnap] = await Promise.all([
@@ -703,32 +633,38 @@
           db.ref('keuangan_hpp').once('value'),
           db.ref('keuangan_tabungan').once('value')
         ]);
-        table_others_overview.innerHTML = '';
-        // Operasional
+        table_opr.innerHTML = ''; table_hpp.innerHTML = ''; table_tabungan.innerHTML = ''; table_others_overview.innerHTML = '';
         oprSnap.forEach(s => {
           const d = s.val();
           const tr = document.createElement('tr');
-          tr.innerHTML = `<td>${d.date||''}</td><td>Operasional</td><td>${escapeHtml(d.desc||'')}</td><td>${formatRp(d.amount)}</td>`;
-          table_others_overview.prepend(tr);
+          tr.innerHTML = `<td>${d.date||''}</td><td>${escapeHtml(d.desc||'')}</td><td>${formatRp(d.amount)}</td><td>${escapeHtml(d.user||'')}</td>`;
+          table_opr.prepend(tr);
+          const tr2 = document.createElement('tr');
+          tr2.innerHTML = `<td>${d.date||''}</td><td>Operasional</td><td>${escapeHtml(d.desc||'')}</td><td>${formatRp(d.amount)}</td>`;
+          table_others_overview.prepend(tr2);
         });
-        // HPP
         hppSnap.forEach(s => {
           const d = s.val();
           const tr = document.createElement('tr');
-          tr.innerHTML = `<td>${d.date||''}</td><td>HPP</td><td>${escapeHtml(d.desc||'')}</td><td>${formatRp(d.amount)}</td>`;
-          table_others_overview.prepend(tr);
+          tr.innerHTML = `<td>${d.date||''}</td><td>${escapeHtml(d.desc||'')}</td><td>${formatRp(d.amount)}</td><td>${escapeHtml(d.user||'')}</td>`;
+          table_hpp.prepend(tr);
+          const tr2 = document.createElement('tr');
+          tr2.innerHTML = `<td>${d.date||''}</td><td>HPP</td><td>${escapeHtml(d.desc||'')}</td><td>${formatRp(d.amount)}</td>`;
+          table_others_overview.prepend(tr2);
         });
-        // Tabungan
         tabSnap.forEach(s => {
           const d = s.val();
           const tr = document.createElement('tr');
-          tr.innerHTML = `<td>${d.date||''}</td><td>Tabungan</td><td>${escapeHtml(d.desc||'')}</td><td>${formatRp(d.amount)}</td>`;
-          table_others_overview.prepend(tr);
+          tr.innerHTML = `<td>${d.date||''}</td><td>${escapeHtml(d.desc||'')}</td><td>${formatRp(d.amount)}</td><td>${escapeHtml(d.user||'')}</td>`;
+          table_tabungan.prepend(tr);
+          const tr2 = document.createElement('tr');
+          tr2.innerHTML = `<td>${d.date||''}</td><td>Tabungan</td><td>${escapeHtml(d.desc||'')}</td><td>${formatRp(d.amount)}</td>`;
+          table_others_overview.prepend(tr2);
         });
       }catch(e){ console.error('rebuild others overview', e); }
     }
 
-    /***** TRANSAKSI (realtime) *****/
+    // transaksi realtime
     db.ref('transaksi').orderByChild('date').limitToLast(1000).on('value', snap => {
       table_transaksi.innerHTML = ''; table_recent_kasir.innerHTML = '';
       const arr = [];
@@ -738,8 +674,6 @@
         const tr = document.createElement('tr');
         tr.innerHTML = `<td>${d.date}</td><td>${escapeHtml(d.payment||d.kind||d.source||'')}</td><td>${escapeHtml(d.desc || (d.items ? d.items.map(i=>i.name+' x'+i.qty).join(', ') : ''))}</td><td>${formatRp(d.amount)}</td><td>${escapeHtml(d.user||'')}</td>`;
         table_transaksi.appendChild(tr);
-
-        // recent kasir list
         if(d.source === 'kasir' || d.kind === 'sale'){
           const tr2 = document.createElement('tr');
           tr2.innerHTML = `<td>${d.date}</td><td>${escapeHtml(d.desc||'')}</td><td>${formatRp(d.amount)}</td>`;
@@ -748,28 +682,26 @@
       });
     });
 
-    /***** BUTTON HOOKS: manual add keuangan utama *****/
+    // manual keuangan utama
     $('btn_save_main').addEventListener('click', async () => {
       if(!checkAdmin()) return;
-      const desc = main_desc.value.trim(), type = main_type.value, amount = Number(main_amount.value);
+      const desc = $('main_desc').value.trim(), type = $('main_type').value, amount = Number($('main_amount').value);
       if(!desc || !amount) return showToast('Isi data valid');
       const id = db.ref().child('keuangan_utama').push().key;
       await db.ref('keuangan_utama/' + id).set({ id, desc, type, amount, date: new Date().toLocaleString(), user: currentUser.email });
-      main_desc.value=''; main_amount.value='';
+      $('main_desc').value=''; $('main_amount').value='';
       showToast('Tersimpan di keuangan utama');
     });
 
-    /***** MOVE FROM UTAMA to opr/tab/hpp (admin) *****/
-    btn_move_opr.addEventListener('click', ()=> moveFromMain('keuangan_opr', opr_desc.value, opr_amount.value, 'oprational'));
-    btn_move_tab.addEventListener('click', ()=> moveFromMain('keuangan_tabungan', tab_desc.value, tab_amount.value, 'tabungan'));
-    btn_move_hpp.addEventListener('click', ()=> moveFromMain('keuangan_hpp', hpp_desc.value, hpp_amount.value, 'hpp'));
+    // move from main
+    $('btn_move_opr').addEventListener('click', ()=> moveFromMain('keuangan_opr', $('opr_desc').value, $('opr_amount').value, 'oprational'));
+    $('btn_move_tab').addEventListener('click', ()=> moveFromMain('keuangan_tabungan', $('tab_desc').value, $('tab_amount').value, 'tabungan'));
+    $('btn_move_hpp').addEventListener('click', ()=> moveFromMain('keuangan_hpp', $('hpp_desc').value, $('hpp_amount').value, 'hpp'));
 
     async function moveFromMain(targetTable, descInput, amountInput, entryType){
       if(!checkAdmin()) return;
       let desc = (descInput || '').trim(); const amount = Number(amountInput);
       if(!desc || !amount) return showToast('Deskripsi & jumlah valid');
-
-      // compute current balance
       const snap = await db.ref('keuangan_utama').once('value');
       let pemasukan=0, pengeluaran=0, opr=0, hpp=0;
       snap.forEach(ch => {
@@ -782,29 +714,25 @@
       const sisa = pemasukan - (pengeluaran + opr + hpp);
       if(sisa < amount) return showToast('Saldo utama tidak cukup');
 
-      // add to target table
       const idTarget = db.ref().child(targetTable).push().key;
       const now = new Date().toLocaleString();
       await db.ref(`${targetTable}/${idTarget}`).set({ id: idTarget, desc, amount, date: now, user: currentUser.email });
 
-      // create pengeluaran record in keuangan_utama so balance reduces
       const idUt = db.ref().child('keuangan_utama').push().key;
       const typeForMain = entryType === 'oprational' ? 'oprational' : (entryType === 'hpp' ? 'hpp' : 'pengeluaran');
       await db.ref(`keuangan_utama/${idUt}`).set({ id: idUt, desc: `Pindah→${targetTable.replace('keuangan_','')} - ${desc}`, type: typeForMain, amount, date: now, user: currentUser.email, refTarget: idTarget });
 
-      // create a small transaction record for audit trail
       const txId = db.ref().child('transaksi').push().key;
       await db.ref(`transaksi/${txId}`).set({ id: txId, date: now, amount, desc: `Pindah→${targetTable.replace('keuangan_','')} - ${desc}`, user: currentUser.email, kind: 'pindah', target: targetTable });
 
-      // clear inputs
-      if(targetTable === 'keuangan_opr'){ opr_desc.value = ''; opr_amount.value = ''; }
-      if(targetTable === 'keuangan_tabungan'){ tab_desc.value = ''; tab_amount.value = ''; }
-      if(targetTable === 'keuangan_hpp'){ hpp_desc.value = ''; hpp_amount.value = ''; }
+      if(targetTable === 'keuangan_opr'){ $('opr_desc').value=''; $('opr_amount').value=''; }
+      if(targetTable === 'keuangan_tabungan'){ $('tab_desc').value=''; $('tab_amount').value=''; }
+      if(targetTable === 'keuangan_hpp'){ $('hpp_desc').value=''; $('hpp_amount').value=''; }
       showToast('Berhasil memindahkan dari Utama');
     }
 
-    /***** FILTER & EXPORT HANDLERS *****/
-    btnApplyFilter.addEventListener('click', async () => {
+    // export & filter handlers
+    $('btnApplyFilter').addEventListener('click', async () => {
       const from = filter_from.value, to = filter_to.value;
       if(!from || !to) return showToast('Pilih rentang tanggal');
       const snap = await db.ref('transaksi').once('value');
@@ -821,7 +749,7 @@
       showToast('Filter diterapkan');
     });
 
-    btnExportCsv.addEventListener('click', async () => {
+    $('btnExportCsv').addEventListener('click', async () => {
       try{
         const [utama, opr, tab, hpp, tx, prd] = await Promise.all([
           db.ref('keuangan_utama').once('value'),
@@ -844,11 +772,135 @@
       } catch(err){ console.error(err); showToast('Export gagal'); }
     });
 
-    // KASIR: Add / render cart
-    // ... (cart handlers outside)
+    // CART handlers (same as before)
+    // checkout / addToCart implemented below (outside attachListeners)
   } // end attachListeners
 
-  // CART & KASIR
+  /***** PRODUCTS rendering & interactions (search-aware) *****/
+  function renderProductsUI(q){
+    // q = search lowercased substring
+    const filter = String(q || '').trim().toLowerCase();
+    table_products.innerHTML = ''; products_container.innerHTML = '';
+
+    Object.keys(PRODUCTS).forEach(id => {
+      const p = PRODUCTS[id];
+      const label = `${p.name || ''}`.toLowerCase();
+      if(filter && !label.includes(filter)) return; // skip non-matching
+      // table row
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${escapeHtml(p.name)}</td><td>${formatRp(p.cost)}</td><td>${formatRp(p.price)}</td>
+        <td>
+          <button class="btn small edit" data-id="${id}" style="padding:6px">Edit</button>
+          <button class="btn small del" data-id="${id}" style="padding:6px;background:#1a2330;color:#e7eef8">Hapus</button>
+        </td>`;
+      table_products.appendChild(tr);
+
+      // product card for kasir
+      const div = document.createElement('div'); div.className = 'product-card';
+      div.innerHTML = `<div>
+          <div style="font-weight:600">${escapeHtml(p.name)}</div>
+          <div class="kicker muted">Jual: ${formatRp(p.price)} • Modal: ${formatRp(p.cost)}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">
+          <button class="btn add-to-cart" data-id="${id}" style="padding:6px">Tambah</button>
+          ${ isAdmin ? `<button class="btn edit-card" data-id="${id}" style="padding:6px;background:#1a2330;color:#e7eef8">Edit</button>` : '' }
+        </div>`;
+      products_container.appendChild(div);
+    });
+
+    // attach events after render
+    table_products.querySelectorAll('.edit').forEach(b => b.addEventListener('click', (e) => {
+      if(!checkAdmin()) return;
+      const id = e.target.dataset.id; openProductModal({ mode: 'edit', id });
+    }));
+    table_products.querySelectorAll('.del').forEach(b => b.addEventListener('click', async (e) => {
+      if(!checkAdmin()) return;
+      const id = e.target.dataset.id;
+      if(!confirm('Hapus produk?')) return;
+      await db.ref('produk/' + id).remove();
+      showToast('Produk dihapus');
+    }));
+    products_container.querySelectorAll('.add-to-cart').forEach(b => b.addEventListener('click', e => addToCart(e.target.dataset.id, 1)));
+    products_container.querySelectorAll('.edit-card').forEach(b => b.addEventListener('click', (e) => {
+      if(!checkAdmin()) return;
+      const id = e.target.dataset.id; openProductModal({ mode: 'edit', id });
+    }));
+  }
+
+  /***** Modal logic for add/edit product (pure HTML/CSS/JS) *****/
+  function openProductModal(opts = { mode: 'add', id:null }){
+    const { mode, id } = opts;
+    modalBackdrop.style.display = 'flex';
+    modalBackdrop.setAttribute('aria-hidden','false');
+    modalTitle.textContent = mode === 'add' ? 'Tambah Produk' : 'Edit Produk';
+    // build body HTML
+    const product = (mode === 'edit' && id && PRODUCTS[id]) ? PRODUCTS[id] : { name:'', cost:'', price:'' };
+    modalBody.innerHTML = `
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <label class="small-quiet">Nama produk</label>
+        <input id="m_name" class="input-plain" value="${escapeHtml(product.name||'')}" placeholder="Nama produk" />
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <div style="flex:1;min-width:120px">
+            <label class="small-quiet">Modal (HPP)</label>
+            <input id="m_cost" class="input-plain" value="${product.cost||''}" type="number" placeholder="0" />
+          </div>
+          <div style="flex:1;min-width:120px">
+            <label class="small-quiet">Harga Jual</label>
+            <input id="m_price" class="input-plain" value="${product.price||''}" type="number" placeholder="0" />
+          </div>
+        </div>
+        <div class="small-quiet">Pastikan data benar sebelum simpan.</div>
+      </div>
+    `;
+    // save handler
+    modalSave.onclick = async () => {
+      const name = $('m_name').value.trim();
+      const cost = Number($('m_cost').value);
+      const price = Number($('m_price').value);
+      if(!name || !cost || !price) return showToast('Isi data produk lengkap');
+      try{
+        if(mode === 'add'){
+          const newId = db.ref().child('produk').push().key;
+          await db.ref('produk/' + newId).set({ id:newId, name, cost, price });
+          showToast('Produk ditambahkan');
+        } else {
+          await db.ref('produk/' + id).update({ name, cost, price });
+          showToast('Produk diperbarui');
+        }
+        closeModal();
+      }catch(e){ console.error(e); showToast('Gagal menyimpan produk'); }
+    };
+
+    // cancel handler
+    modalCancel.onclick = closeModal;
+
+    // close on backdrop click
+    modalBackdrop.onclick = (ev)=>{
+      if(ev.target === modalBackdrop) closeModal();
+    };
+
+    // close on Esc key
+    document.addEventListener('keydown', escHandler);
+
+    // focus first input
+    setTimeout(()=> $('m_name').focus(), 80);
+  }
+
+  function escHandler(e){
+    if(e.key === 'Escape') closeModal();
+  }
+
+  function closeModal(){
+    modalBackdrop.style.display = 'none';
+    modalBackdrop.setAttribute('aria-hidden','true');
+    modalBody.innerHTML = '';
+    modalSave.onclick = null;
+    modalCancel.onclick = null;
+    modalBackdrop.onclick = null;
+    document.removeEventListener('keydown', escHandler);
+  }
+
+  /***** CART / KASIR functions *****/
   function addToCart(productId, qty = 1){
     const p = PRODUCTS[productId];
     if(!p) return showToast('Produk tidak tersedia');
@@ -866,7 +918,6 @@
       cart_table.appendChild(tr);
     });
 
-    // handlers for qty change & remove
     cart_table.querySelectorAll('.qty').forEach(inp => inp.addEventListener('change', e => {
       const idx = Number(e.target.dataset.idx); const v = Number(e.target.value); if(v <= 0) return;
       CART[idx].qty = v; renderCart();
@@ -910,7 +961,7 @@
     } catch(err){ console.error(err); showToast('Checkout gagal'); }
   });
 
-  // DAILY COMPUTE & CHARTS
+  /***** DAILY COMPUTE & CHARTS *****/
   async function computeAndRenderDaily(){
     try{
       const snap = await db.ref('transaksi').once('value');
@@ -927,16 +978,14 @@
             byDate[dateKey].net += (price - cost) * qty;
           });
         } else {
-          // fallback: if tx has amount only
           byDate[dateKey].gross += Number(d.amount || 0);
         }
       });
 
       const arr = Object.keys(byDate).map(k => ({ date: k, gross: byDate[k].gross, net: byDate[k].net }));
-      arr.sort((a,b) => new Date(a.date) - new Date(b.date)); // asc
-      const recent = arr.slice(-7); // last 7 days
+      arr.sort((a,b) => new Date(a.date) - new Date(b.date));
+      const recent = arr.slice(-7);
 
-      // render table
       table_daily.innerHTML = '';
       recent.slice().reverse().forEach(r => {
         const tr = document.createElement('tr');
@@ -944,7 +993,6 @@
         table_daily.prepend(tr);
       });
 
-      // chart
       if(chartDaily) chartDaily.destroy();
       if(chartDailyCtx){
         const labels = recent.map(r => r.date);
@@ -979,7 +1027,7 @@
 
   function escapeCsv(s){ if(s==null) return ''; s = String(s); if(s.includes(',') || s.includes('"') || s.includes('\n')) return '"' + s.replace(/"/g,'""') + '"'; return s; }
 
-  // TABS: finance tabs & tabpanel toggling
+  // Tabs: finance tabs toggling
   (function initFinanceTabs(){
     const tabBtns = Array.from(document.querySelectorAll('#financeTabs .tabbtn'));
     const panels = Array.from(document.querySelectorAll('.tabpanel'));
@@ -987,15 +1035,11 @@
       tabBtns.forEach(b => { b.classList.remove('active'); b.setAttribute('aria-selected','false'); });
       panels.forEach(p => p.classList.add('hidden'), p => p.setAttribute('aria-hidden','true'));
       const tab = tabBtn.dataset.tab;
-      tabBtn.classList.add('active');
-      tabBtn.setAttribute('aria-selected','true');
+      tabBtn.classList.add('active'); tabBtn.setAttribute('aria-selected','true');
       const panel = document.getElementById(tab);
-      if(panel){ panel.classList.remove('hidden'); panel.setAttribute('aria-hidden','false'); }
-      // Scroll into view small optimization
-      panel?.scrollIntoView({ behavior:'smooth', block:'start' });
+      if(panel){ panel.classList.remove('hidden'); panel.setAttribute('aria-hidden','false'); panel.scrollIntoView({ behavior:'smooth', block:'start' }); }
     }
     tabBtns.forEach(b => b.addEventListener('click', ()=> activate(b)));
-    // keyboard access (arrow left/right)
     document.querySelector('#financeTabs')?.addEventListener('keydown', (e) => {
       const idx = tabBtns.findIndex(t => t.classList.contains('active'));
       if(e.key === 'ArrowRight') tabBtns[(idx+1)%tabBtns.length].focus();
