@@ -80,7 +80,7 @@
     .row{display:flex;gap:12px;flex-wrap:wrap}
     .col{flex:1;min-width:220px}
     input,select,textarea{width:100%;padding:8px;border-radius:8px;border:1px solid var(--glass-border);background:transparent;color:var(--white-soft)}
-    .input-plain{background:transparent;border:1px solid rgba(255,255,255,0.03);padding:8px;border-radius:8px;color:var(--white-soft)}
+    .input-plain{background:black;border:1px solid rgba(255,255,255,0.03);padding:8px;border-radius:8px;color:var(--white-soft)}
     button.btn{background:linear-gradient(90deg,var(--pink),var(--pink-2));border:none;color:#071127;padding:8px 12px;border-radius:8px;cursor:pointer}
     button.btn.secondary{background:#1b2430;color:var(--white-soft)}
     table{width:100%;border-collapse:collapse;margin-top:8px;font-size:13px}
@@ -220,8 +220,8 @@
 
   <div class="app-wrap" id="appWrap">
     <button id="sidebarToggle" class="sidebar-toggle" aria-expanded="false" aria-controls="sidebar">
-      Tampilkan Menu
-    </button>
+      Tampilkan Menu
+    </button>
     <aside class="sidebar" id="sidebar" aria-label="Sidebar">
       <div style="display:flex;flex-direction:column;gap:6px">
         <div class="brand">💖 Jeda Keuangan</div>
@@ -233,6 +233,7 @@
         <button id="nav_kasir" aria-controls="view_kasir">🛒 Kasir</button>
         <button id="nav_products" aria-controls="view_products">🧾 Produk</button>
         <button id="nav_keuangan" aria-controls="view_keuangan">💼 Keuangan</button>
+        <!-- nav_bahan akan disisipkan otomatis jika belum ada -->
       </div>
 
       <div class="meta">
@@ -484,6 +485,8 @@
         </div>
       </section>
 
+      <!-- Stok Bahan (akan diinsert otomatis oleh script) -->
+
     </main>
   </div>
 
@@ -544,7 +547,8 @@
     dashboard: $('view_dashboard'),
     products: $('view_products'),
     keuangan: $('view_keuangan'),
-    kasir: $('view_kasir')
+    kasir: $('view_kasir'),
+    // 'bahan' view will be created dynamically
   };
   const navButtons = {
     dashboard: $('nav_dashboard'), kasir: $('nav_kasir'), products: $('nav_products'), keuangan: $('nav_keuangan')
@@ -591,9 +595,10 @@
   // state
   let currentUser = null, isAdmin = false;
   let PRODUCTS = {}, CART = [];
+  let BAHAN_STOK = {}; // key -> { nama, stok, satuan, updated }
   let attached = false;
 
-  // auth
+  // --- auth
   btnLogin.addEventListener('click', ()=> {
     const email = login_email.value.trim(), pass = login_pass.value;
     if(!email || !pass){ login_msg.textContent = 'Isi email & password'; return; }
@@ -623,7 +628,11 @@
   // sidebar nav
   function setSidebarActive(key){
     Object.values(navButtons).forEach(b => b.classList.remove('active'));
+    // nav_bahan may exist
+    const nb = document.getElementById('nav_bahan');
+    if(nb) nb.classList.remove('active');
     if(navButtons[key]) navButtons[key].classList.add('active');
+    if(key === 'bahan' && nb) nb.classList.add('active');
   }
   navButtons.dashboard.addEventListener('click', ()=> { if(!checkAdmin()) return; showOnly('dashboard'); setSidebarActive('dashboard'); });
   navButtons.kasir.addEventListener('click', ()=> { showOnly('kasir'); setSidebarActive('kasir'); });
@@ -635,6 +644,9 @@
 
   function showOnly(key){
     Object.keys(views).forEach(k => views[k].classList.add('hidden'));
+    // bahan may be dynamically registered in views after creation
+    const vb = document.getElementById('view_bahan');
+    if(vb) views['bahan'] = vb;
     if(views[key]) views[key].classList.remove('hidden');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
@@ -644,7 +656,129 @@
     return true;
   }
 
-  /***** Attach realtime listeners & UI handlers *****/
+  /***** Ensure Stok Bahan view & nav exists (and render functions) *****/
+  (function ensureBahanViewExists(){
+    if(document.getElementById('nav_bahan')) return; // sudah ada
+    // buat tombol nav
+    const btn = document.createElement('button');
+    btn.id = 'nav_bahan';
+    btn.textContent = '📦 Stok Bahan';
+    btn.setAttribute('aria-controls', 'view_bahan');
+    btn.addEventListener('click', ()=> {
+      if(!checkAdmin()) return;
+      showOnly('bahan'); setSidebarActive('bahan');
+    });
+    document.getElementById('nav')?.appendChild(btn);
+
+    // buat section view
+    const main = document.querySelector('main.main');
+    const sec = document.createElement('section');
+    sec.id = 'view_bahan';
+    sec.className = 'card hidden';
+    sec.innerHTML = `
+      <h4 style="color:var(--pink);margin:0 0 8px 0">Stok Bahan</h4>
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+        <div>
+          <div class="small-quiet">Daftar bahan baku dan stok.</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button id="btnAddBahan" class="btn">+ Tambah Bahan</button>
+        </div>
+      </div>
+      <div style="margin-top:12px;max-height:420px;overflow:auto" class="table-wrap">
+        <table id="table_bahan"><thead><tr><th>Key</th><th>Nama</th><th>Stok</th><th>Satuan</th><th>Updated</th><th>Aksi</th></tr></thead><tbody></tbody></table>
+      </div>
+    `;
+    // sisipkan di akhir main
+    main.appendChild(sec);
+
+    // register button handler after DOM exists
+    setTimeout(()=> {
+      document.getElementById('btnAddBahan')?.addEventListener('click', ()=> {
+        if(!checkAdmin()) return;
+        openBahanModal({ mode:'add' });
+      });
+    }, 80);
+  })();
+
+  /* Render daftar bahan ke tabel */
+  async function renderBahanUI(){
+    const tbody = document.querySelector('#table_bahan tbody');
+    if(!tbody) return;
+    tbody.innerHTML = '';
+    // BAHAN_STOK: key -> { nama, stok, satuan, updated }
+    Object.keys(BAHAN_STOK).forEach(key => {
+      const b = BAHAN_STOK[key];
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${escapeHtml(key)}</td>
+        <td>${escapeHtml(b.nama||'')}</td>
+        <td>${b.stok ?? 0}</td>
+        <td>${escapeHtml(b.satuan||'')}</td>
+        <td>${escapeHtml(b.updated||'')}</td>
+        <td>
+          <button class="btn small edit-bahan" data-key="${escapeHtml(key)}" style="padding:6px">Edit</button>
+          <button class="btn small del-bahan" data-key="${escapeHtml(key)}" style="padding:6px;background:#1a2330;color:#e7eef8">Hapus</button>
+        </td>`;
+      tbody.appendChild(tr);
+    });
+
+    // events
+    tbody.querySelectorAll('.edit-bahan').forEach(b => b.addEventListener('click', (e)=>{
+      const key = e.target.dataset.key;
+      openBahanModal({ mode:'edit', key });
+    }));
+    tbody.querySelectorAll('.del-bahan').forEach(b => b.addEventListener('click', async (e)=>{
+      const key = e.target.dataset.key;
+      if(!confirm('Hapus bahan stok "'+key+'"?')) return;
+      await db.ref('bahan_stok/' + key).remove();
+      showToast('Bahan dihapus');
+    }));
+  }
+
+  /* Modal tambah/edit bahan stok */
+  function openBahanModal(opts = { mode:'add', key:null }){
+    const { mode, key } = opts;
+    modalBackdrop.style.display = 'flex';
+    modalBackdrop.setAttribute('aria-hidden','false');
+    modalTitle.textContent = mode==='add' ? 'Tambah Bahan' : 'Edit Bahan';
+    const existing = (key && BAHAN_STOK[key]) ? BAHAN_STOK[key] : { nama:'', stok:0, satuan:'' };
+
+    modalBody.innerHTML = `
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <label class="small-quiet">Key (unique, lowercase, no spasi)</label>
+        <input id="b_key" class="input-plain" value="${mode==='edit'?escapeHtml(key):''}" placeholder="contoh: skm" ${mode==='edit' ? 'disabled' : ''}/>
+        <label class="small-quiet">Nama bahan</label>
+        <input id="b_nama" class="input-plain" value="${escapeHtml(existing.nama||'')}" placeholder="SKM"/>
+        <div style="display:flex;gap:8px">
+          <div style="flex:1"><label class="small-quiet">Stok (angka)</label><input id="b_stok" class="input-plain" type="number" value="${existing.stok ?? 0}"/></div>
+          <div style="flex:1"><label class="small-quiet">Satuan</label><input id="b_satuan" class="input-plain" value="${escapeHtml(existing.satuan||'')}" placeholder="ml/g/pcs"/></div>
+        </div>
+        <div class="small-quiet">Gunakan form ini untuk menambah atau koreksi stok bahan.</div>
+      </div>
+    `;
+
+    // cleanup prior handlers
+    modalSave.onclick = null;
+    modalCancel.onclick = null;
+    modalBackdrop.onclick = null;
+
+    modalSave.onclick = async () => {
+      const newKey = $('b_key').value.trim();
+      const nama = $('b_nama').value.trim();
+      const stok = Number($('b_stok').value || 0);
+      const satuan = $('b_satuan').value.trim();
+      if(!newKey || !nama) return showToast('Key & Nama wajib diisi');
+      const payload = { nama, stok, satuan, updated: new Date().toLocaleString() };
+      await db.ref('bahan_stok/' + newKey).set(payload);
+      showToast(mode==='add' ? 'Bahan ditambahkan' : 'Bahan diperbarui');
+      closeModal();
+    };
+    modalCancel.onclick = closeModal;
+    modalBackdrop.onclick = (ev)=>{ if(ev.target === modalBackdrop) closeModal(); };
+    document.addEventListener('keydown', escHandler);
+  }
+
+  /***** PRODUCTS realtime & komposisi integration *****/
   function attachListeners(){
     if(attached) return;
     attached = true;
@@ -656,8 +790,18 @@
         const p = ch.val(); if(!p) return;
         PRODUCTS[ch.key] = p;
       });
+      renderProductsUI(productSearch.value || '');
+    });
 
-      // render (apply search filter)
+    // BAHAN_STOK realtime
+    db.ref('bahan_stok').on('value', snap => {
+      BAHAN_STOK = {};
+      snap.forEach(ch => {
+        const d = ch.val(); if(!d) return;
+        BAHAN_STOK[ch.key] = d;
+      });
+      renderBahanUI(); // update bahan view if dibuka
+      // re-render product cards to reflect availability
       renderProductsUI(productSearch.value || '');
     });
 
@@ -671,14 +815,11 @@
     let searchTimer = null;
     productSearch.addEventListener('input', (e) => {
       const q = String(e.target.value || '').trim().toLowerCase();
-      // slight debounce for smoother typing
       clearTimeout(searchTimer);
       searchTimer = setTimeout(()=> renderProductsUI(q), 120);
     });
 
-    // add product save handled inside modal submit below
-
-    /***** KEUANGAN UTAMA (realtime) *****/
+    // KEUANGAN UTAMA (realtime)
     db.ref('keuangan_utama').on('value', snap => {
       table_keuangan_utama.innerHTML = ''; table_keuangan_utama_overview.innerHTML = '';
       let pemasukan = 0, pengeluaran = 0, opr = 0, hpp = 0;
@@ -832,13 +973,14 @@
 
     $('btnExportCsv').addEventListener('click', async () => {
       try{
-        const [utama, opr, tab, hpp, tx, prd] = await Promise.all([
+        const [utama, opr, tab, hpp, tx, prd, bahan] = await Promise.all([
           db.ref('keuangan_utama').once('value'),
           db.ref('keuangan_opr').once('value'),
           db.ref('keuangan_tabungan').once('value'),
           db.ref('keuangan_hpp').once('value'),
           db.ref('transaksi').once('value'),
-          db.ref('produk').once('value')
+          db.ref('produk').once('value'),
+          db.ref('bahan_stok').once('value')
         ]);
         let csv = 'Tabel,ID,Tanggal,Deskripsi,Jenis,Jumlah,User\n';
         utama.forEach(s => { const d = s.val(); csv += `keuangan_utama,${d.id},${d.date},${escapeCsv(d.desc)},${escapeCsv(d.type)},${d.amount},${escapeCsv(d.user)}\n`; });
@@ -847,19 +989,18 @@
         hpp.forEach(s => { const d = s.val(); csv += `keuangan_hpp,${d.id},${d.date},${escapeCsv(d.desc)},hpp,${d.amount},${escapeCsv(d.user)}\n`; });
         tx.forEach(s => { const d = s.val(); csv += `transaksi,${d.id},${d.date},${escapeCsv(d.desc)},${escapeCsv(d.kind||d.source)},${d.amount},${escapeCsv(d.user)}\n`; });
         prd.forEach(s => { const d = s.val(); csv += `produk,${d.id},,${escapeCsv(d.name)},modal:${d.cost},jual:${d.price}\n`; });
+        bahan.forEach(s => { const d = s.val(); csv += `bahan_stok,${s.key || ''},,${escapeCsv(d.nama)},stok:${d.stok},satuan:${d.satuan}\n`; });
         const blob = new Blob([csv], { type: 'text/csv' }); const url = URL.createObjectURL(blob);
         const a = document.createElement('a'); a.href = url; a.download = 'data_keuangan.csv'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
         showToast('Export selesai');
       } catch(err){ console.error(err); showToast('Export gagal'); }
     });
 
-    // CART handlers (same as before)
-    // checkout / addToCart implemented below (outside attachListeners)
+    // CART handlers (implemented below)
   } // end attachListeners
 
   /***** PRODUCTS rendering & interactions (search-aware) *****/
   function renderProductsUI(q){
-    // q = search lowercased substring
     const filter = String(q || '').trim().toLowerCase();
     table_products.innerHTML = ''; products_container.innerHTML = '';
 
@@ -867,6 +1008,7 @@
       const p = PRODUCTS[id];
       const label = `${p.name || ''}`.toLowerCase();
       if(filter && !label.includes(filter)) return; // skip non-matching
+
       // table row
       const tr = document.createElement('tr');
       tr.innerHTML = `<td>${escapeHtml(p.name)}</td><td>${formatRp(p.cost)}</td><td>${formatRp(p.price)}</td>
@@ -878,12 +1020,41 @@
 
       // product card for kasir
       const div = document.createElement('div'); div.className = 'product-card';
+
+      // check availability from komposisi & BAHAN_STOK
+      let availabilityNote = '';
+      let canBuy = true;
+      if(p.komposisi && typeof p.komposisi === 'object'){
+        const missing = [];
+        Object.keys(p.komposisi).forEach(k => {
+          const needPerUnit = Number(p.komposisi[k] || 0);
+          const stok = BAHAN_STOK[k] ? Number(BAHAN_STOK[k].stok || 0) : 0;
+          if(stok <= 0 || stok < needPerUnit) missing.push(`${k}`);
+        });
+        if(missing.length){
+          availabilityNote = `⛔ Stok kurang: ${missing.join(', ')}`;
+          canBuy = false;
+        } else {
+          availabilityNote = `✔ Stok cukup`;
+          canBuy = true;
+        }
+      } else {
+        // jika produk tidak punya komposisi, biarkan bisa dibeli
+        availabilityNote = '';
+        canBuy = true;
+      }
+
+      // small badge for komposisi presence
+      const compBadge = (p.komposisi && Object.keys(p.komposisi).length) ? `<div class="small-quiet">Komposisi: ${Object.keys(p.komposisi).length} bahan</div>` : '';
+
       div.innerHTML = `<div>
           <div style="font-weight:600">${escapeHtml(p.name)}</div>
           <div class="kicker muted">Jual: ${formatRp(p.price)} • Modal: ${formatRp(p.cost)}</div>
+          ${compBadge}
+          <div class="small-quiet" style="margin-top:6px">${escapeHtml(availabilityNote)}</div>
         </div>
         <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">
-          <button class="btn add-to-cart" data-id="${id}" style="padding:6px">Tambah</button>
+          <button class="btn add-to-cart" data-id="${id}" style="padding:6px"${!canBuy ? ' disabled aria-disabled="true"' : ''}>Tambah</button>
           ${ isAdmin ? `<button class="btn edit-card" data-id="${id}" style="padding:6px;background:#1a2330;color:#e7eef8">Edit</button>` : '' }
         </div>`;
       products_container.appendChild(div);
@@ -901,21 +1072,33 @@
       await db.ref('produk/' + id).remove();
       showToast('Produk dihapus');
     }));
-    products_container.querySelectorAll('.add-to-cart').forEach(b => b.addEventListener('click', e => addToCart(e.target.dataset.id, 1)));
+    products_container.querySelectorAll('.add-to-cart').forEach(b => b.addEventListener('click', e => {
+      // if button disabled, do nothing
+      if(e.target.disabled) return showToast('Stok bahan tidak mencukupi');
+      addToCart(e.target.dataset.id, 1);
+    }));
     products_container.querySelectorAll('.edit-card').forEach(b => b.addEventListener('click', (e) => {
       if(!checkAdmin()) return;
       const id = e.target.dataset.id; openProductModal({ mode: 'edit', id });
     }));
   }
 
-  /***** Modal logic for add/edit product (pure HTML/CSS/JS) *****/
+  /***** Modal logic for add/edit product (dengan editor komposisi row-by-row) *****/
   function openProductModal(opts = { mode: 'add', id:null }){
     const { mode, id } = opts;
     modalBackdrop.style.display = 'flex';
     modalBackdrop.setAttribute('aria-hidden','false');
     modalTitle.textContent = mode === 'add' ? 'Tambah Produk' : 'Edit Produk';
-    // build body HTML
-    const product = (mode === 'edit' && id && PRODUCTS[id]) ? PRODUCTS[id] : { name:'', cost:'', price:'' };
+
+    // cleanup previous handlers to avoid duplicate behavior
+    modalSave.onclick = null;
+    modalCancel.onclick = null;
+    modalBackdrop.onclick = null;
+
+    const product = (mode === 'edit' && id && PRODUCTS[id]) ? PRODUCTS[id] : { name:'', cost:'', price:'', komposisi: {} };
+    const komposisi = product.komposisi || {};
+
+    // Build HTML with komposisi editor (row-by-row)
     modalBody.innerHTML = `
       <div style="display:flex;flex-direction:column;gap:8px">
         <label class="small-quiet">Nama produk</label>
@@ -930,40 +1113,90 @@
             <input id="m_price" class="input-plain" value="${product.price||''}" type="number" placeholder="0" />
           </div>
         </div>
-        <div class="small-quiet">Pastikan data benar sebelum simpan.</div>
+
+        <hr style="border:none;height:1px;background:rgba(255,255,255,0.03);margin:6px 0" />
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div class="small-quiet">Komposisi Bahan (per 1 unit produk)</div>
+          <div><button id="btnAddKomposisiRow" class="btn secondary" style="padding:6px">+ Baris</button></div>
+        </div>
+        <div id="komposisi_rows" style="display:flex;flex-direction:column;gap:8px;margin-top:8px"></div>
+        <div class="small-quiet">Tambahkan bahan & jumlah yang diperlukan per 1 unit produk (mis: susu=150 ml).</div>
       </div>
     `;
+
+    // render existing komposisi rows if any
+    const rowsContainer = $('komposisi_rows');
+    function createKomRow(key='', qty=''){
+      // select bahan dropdown + qty input + remove button
+      const row = document.createElement('div');
+      row.className = 'kom-row';
+      row.style.display = 'flex';
+      row.style.gap = '8px';
+      row.style.alignItems = 'center';
+      row.innerHTML = `
+        <select class="kom-bahan input-plain" style="flex:1">
+          <option value="">-- pilih bahan --</option>
+        </select>
+        <input class="kom-qty input-plain" type="number" style="width:120px" placeholder="jumlah" value="${qty||''}" />
+        <input class="kom-satuan input-plain" style="width:120px" placeholder="satuan (ops)" value="${BAHAN_STOK[key] ? BAHAN_STOK[key].satuan || '' : ''}" />
+        <button class="btn small btn-remove-kom" style="padding:6px;background:#1a2330;color:#e7eef8">Hapus</button>
+      `;
+      // populate select
+      const sel = row.querySelector('.kom-bahan');
+      Object.keys(BAHAN_STOK).forEach(k => {
+        const opt = document.createElement('option');
+        opt.value = k; opt.textContent = `${k} — ${BAHAN_STOK[k].nama || ''} (${BAHAN_STOK[k].stok || 0} ${BAHAN_STOK[k].satuan || ''})`;
+        sel.appendChild(opt);
+      });
+      if(key) sel.value = key;
+      // handlers
+      row.querySelector('.btn-remove-kom').addEventListener('click', ()=> row.remove());
+      rowsContainer.appendChild(row);
+      return row;
+    }
+    // init rows from komposisi object
+    Object.keys(komposisi || {}).forEach(k => createKomRow(k, komposisi[k]));
+
+    // add empty row on click
+    $('btnAddKomposisiRow').addEventListener('click', ()=> createKomRow());
+
     // save handler
     modalSave.onclick = async () => {
       const name = $('m_name').value.trim();
       const cost = Number($('m_cost').value);
       const price = Number($('m_price').value);
       if(!name || !cost || !price) return showToast('Isi data produk lengkap');
+
+      // collect komposisi rows
+      const komRows = Array.from(rowsContainer.querySelectorAll('.kom-row'));
+      const komObj = {};
+      for(const r of komRows){
+        const k = r.querySelector('.kom-bahan').value;
+        const q = Number(r.querySelector('.kom-qty').value || 0);
+        if(!k) continue;
+        if(!q || q <= 0) { showToast('Jumlah bahan harus > 0'); return; }
+        komObj[k] = q;
+      }
+
       try{
         if(mode === 'add'){
           const newId = db.ref().child('produk').push().key;
-          await db.ref('produk/' + newId).set({ id:newId, name, cost, price });
+          await db.ref('produk/' + newId).set({ id:newId, name, cost, price, komposisi: komObj });
           showToast('Produk ditambahkan');
         } else {
-          await db.ref('produk/' + id).update({ name, cost, price });
+          await db.ref('produk/' + id).update({ name, cost, price, komposisi: komObj });
           showToast('Produk diperbarui');
         }
         closeModal();
       }catch(e){ console.error(e); showToast('Gagal menyimpan produk'); }
     };
 
-    // cancel handler
+    // cancel & backdrop handlers
     modalCancel.onclick = closeModal;
-
-    // close on backdrop click
-    modalBackdrop.onclick = (ev)=>{
-      if(ev.target === modalBackdrop) closeModal();
-    };
-
-    // close on Esc key
+    modalBackdrop.onclick = (ev)=>{ if(ev.target === modalBackdrop) closeModal(); };
     document.addEventListener('keydown', escHandler);
 
-    // focus first input
+    // focus
     setTimeout(()=> $('m_name').focus(), 80);
   }
 
@@ -981,10 +1214,31 @@
     document.removeEventListener('keydown', escHandler);
   }
 
-  /***** CART / KASIR functions *****/
+  /***** CART / KASIR functions with bahan stok check and deduction on checkout *****/
+  function canFulfillProduct(productId, qty = 1){
+    const p = PRODUCTS[productId];
+    if(!p) return false;
+    if(!p.komposisi || typeof p.komposisi !== 'object') return true; // no komposisi -> assume purchasable
+    const missing = [];
+    Object.keys(p.komposisi).forEach(k => {
+      const needPerUnit = Number(p.komposisi[k] || 0);
+      const needTotal = needPerUnit * qty;
+      const stok = BAHAN_STOK[k] ? Number(BAHAN_STOK[k].stok || 0) : 0;
+      if(stok < needTotal) missing.push({ key:k, need:needTotal, stok });
+    });
+    return { ok: missing.length === 0, missing };
+  }
+
   function addToCart(productId, qty = 1){
     const p = PRODUCTS[productId];
     if(!p) return showToast('Produk tidak tersedia');
+    // check bahan stok
+    const check = canFulfillProduct(productId, qty);
+    if(check !== true && (!check || !check.ok)) {
+      // compose message
+      const missing = (check && check.missing) ? check.missing.map(m => `${m.key} (butuh ${m.need}, sisa ${m.stok})`).join(', ') : '';
+      return showToast('Stok bahan tidak cukup: ' + missing);
+    }
     const found = CART.find(i => i.id === productId);
     if(found) found.qty += qty; else CART.push({ id: productId, name: p.name, price: Number(p.price), cost: Number(p.cost), qty });
     renderCart();
@@ -1001,6 +1255,16 @@
 
     cart_table.querySelectorAll('.qty').forEach(inp => inp.addEventListener('change', e => {
       const idx = Number(e.target.dataset.idx); const v = Number(e.target.value); if(v <= 0) return;
+      // when qty changed, re-check availability for that product
+      const productId = CART[idx].id;
+      const check = canFulfillProduct(productId, v);
+      if(check !== true && (!check || !check.ok)){
+        const missing = check.missing.map(m => `${m.key} (butuh ${m.need}, sisa ${m.stok})`).join(', ');
+        showToast('Stok tidak cukup: ' + missing);
+        // revert to previous value
+        e.target.value = CART[idx].qty;
+        return;
+      }
       CART[idx].qty = v; renderCart();
     }));
     cart_table.querySelectorAll('.rem').forEach(b => b.addEventListener('click', e => {
@@ -1018,6 +1282,16 @@
   $('btn_checkout').addEventListener('click', async () => {
     if(!currentUser) return showToast('Harap login');
     if(CART.length === 0) return showToast('Keranjang kosong');
+
+    // final availability check before checkout
+    for(const it of CART){
+      const check = canFulfillProduct(it.id, it.qty);
+      if(check !== true && (!check || !check.ok)){
+        const missing = check.missing.map(m => `${m.key} (butuh ${m.need}, sisa ${m.stok})`).join(', ');
+        return showToast('Stok tidak cukup untuk: ' + it.name + ' → ' + missing);
+      }
+    }
+
     const method = pay_method.value;
     const total = CART.reduce((s,i) => s + (i.price * i.qty), 0);
     const totalHpp = CART.reduce((s,i) => s + (i.cost * i.qty), 0);
@@ -1037,6 +1311,28 @@
         const idOut = db.ref().child('keuangan_utama').push().key;
         await db.ref('keuangan_utama/' + idOut).set({ id: idOut, desc: 'HPP - ' + txId, type: 'hpp', amount: totalHpp, date: new Date().toLocaleString(), user: currentUser.email, refHpp: idHpp });
       }
+
+      // Deduct bahan stok atomically per product
+      // We'll prepare update object to write in a single update() call
+      const stokUpdates = {};
+      Object.keys(PRODUCTS).forEach(pid => {
+        // nothing here; we will loop through CART items
+      });
+      // Build deduction
+      CART.forEach(it => {
+        const p = PRODUCTS[it.id];
+        if(!p || !p.komposisi) return;
+        Object.keys(p.komposisi).forEach(k => {
+          const needPerUnit = Number(p.komposisi[k] || 0);
+          const totalNeed = needPerUnit * it.qty;
+          const current = BAHAN_STOK[k] ? Number(BAHAN_STOK[k].stok || 0) : 0;
+          const newVal = current - totalNeed;
+          // ensure not negative
+          stokUpdates['bahan_stok/' + k + '/stok'] = newVal >= 0 ? newVal : 0;
+          stokUpdates['bahan_stok/' + k + '/updated'] = new Date().toLocaleString();
+        });
+      });
+      if(Object.keys(stokUpdates).length) await db.ref().update(stokUpdates);
 
       CART = []; renderCart(); showToast('Checkout berhasil');
     } catch(err){ console.error(err); showToast('Checkout gagal'); }
