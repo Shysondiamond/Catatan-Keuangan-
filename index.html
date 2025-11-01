@@ -100,7 +100,24 @@
 
     .product-card{padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.02);display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.00))}
 
-    
+    @media (max-width: 1100px){
+      .app-wrap{grid-template-columns: 1fr; padding-bottom: 12px}
+      .sidebar{height:auto;position:relative;display:flex;flex-direction:row;align-items:center;gap:12px;padding:10px}
+      .nav{flex-direction:row;overflow:auto}
+      .nav button{white-space:nowrap}
+      .sidebar .meta{display:none}
+    }
+
+    @media (max-width: 720px){
+      body{padding:8px}
+      .card{padding:10px}
+      .brand{font-size:16px}
+      .sidebar{padding:8px}
+      .topbar{flex-direction:column;align-items:flex-start;gap:6px}
+      .row{flex-direction:column}
+      .product-card{flex-direction:column;align-items:flex-start}
+      .product-card > div:last-child{align-self:stretch;display:flex;justify-content:space-between}
+    }
 
     /* Modal - pure CSS/JS */
     .modal-backdrop{position:fixed;inset:0;background:var(--modal-bg);display:none;align-items:center;justify-content:center;z-index:2000;padding:18px}
@@ -118,58 +135,93 @@
     .small-quiet{font-size:12px;color:var(--muted)}
     .muted-2{color:rgba(255,255,255,0.6)}
     
-    
-    /* === Sidebar Toggle === */
-.menu-toggle {
-  background: transparent;
-  border: 1px solid rgba(255,255,255,0.06);
-  color: var(--white-soft);
-  font-size: 20px;
+    /* ... CSS yang sudah ada ... */
+
+.app-wrap{
+  max-width: var(--max-width);
+  margin: 6px auto;
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+/* Tombol Toggle untuk Mobile */
+.sidebar-toggle {
+  display: none; /* Sembunyikan secara default (di desktop) */
+  background: linear-gradient(90deg,var(--pink),var(--pink-2));
+  border: none;
+  color: #071127;
+  padding: 8px 12px;
   border-radius: 8px;
-  padding: 6px 10px;
   cursor: pointer;
-  display: none; /* hanya tampil di HP */
+  font-weight: 600;
 }
 
-@media (max-width: 1100px) {
-  .menu-toggle {
-    display: block;
+.sidebar{
+  background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.00));
+  border-radius: 12px;
+  padding: 18px;
+  box-shadow: var(--card-shadow);
+  border: 1px solid var(--glass-border);
+  height: calc(100vh - 48px);
+  position: sticky;
+  top: 12px;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  min-width:0;
+  transition: transform 0.3s ease-out, opacity 0.3s ease-out; /* Tambahkan transisi */
+}
+
+/* ... CSS yang sudah ada ... */
+
+@media (max-width: 1100px){
+  .app-wrap{grid-template-columns: 1fr; padding-bottom: 12px}
+  .sidebar-toggle {
+    display: block; /* Tampilkan tombol toggle di HP */
+    margin-bottom: 12px; /* Jarak antara tombol dan main content */
   }
-  .sidebar {
-    position: fixed;
+  .sidebar{
+    height: auto;
+    position: relative;
+    padding: 18px; /* Kembalikan padding normal */
+    
+    /* Sembunyikan secara default di HP (gunakan kelas hidden untuk sembunyikan semua) */
+    display: none; 
+    
+    /* Hapus/modifikasi style layout yang tidak relevan untuk toggle */
+    flex-direction: column; 
+    align-items: stretch;
     top: 0;
-    left: -260px;
-    width: 240px;
-    height: 100vh;
-    background: linear-gradient(180deg, #0b1220, #0f1722);
-    box-shadow: 0 0 30px rgba(0,0,0,0.4);
-    transition: left 0.25s ease;
-    z-index: 999;
-    border-right: 1px solid var(--glass-border);
-    padding: 18px;
   }
-  .sidebar.show {
-    left: 0;
+  
+  /* Saat sidebar dibuka */
+  .sidebar.sidebar-open {
+    display: flex; /* Tampilkan kembali saat kelas 'sidebar-open' ada */
   }
 
-  /* Overlay saat sidebar terbuka */
-  .overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.4);
-    z-index: 998;
-    display: none;
+  .nav{
+    flex-direction: column; /* Ubah navigasi kembali ke vertikal di mode toggle */
+    overflow: visible;
   }
-  .overlay.show {
-    display: block;
-  }
+  
+  .sidebar .meta{display: block; margin-top: 12px;} /* Tampilkan meta di mode toggle */
+  
+  /* Sembunyikan navigasi di tampilan row di layar lebar (original) */
+  /* .nav{flex-direction:row;overflow:auto} */ 
+  /* .sidebar .meta{display:none} */ 
 }
 
+/* ... CSS yang sudah ada ... */
   </style>
 </head>
 <body>
 
   <div class="app-wrap" id="appWrap">
+    <button id="sidebarToggle" class="sidebar-toggle" aria-expanded="false" aria-controls="sidebar">
+      Tampilkan Menu
+    </button>
     <aside class="sidebar" id="sidebar" aria-label="Sidebar">
       <div style="display:flex;flex-direction:column;gap:6px">
         <div class="brand">💖 Jeda Keuangan</div>
@@ -194,8 +246,10 @@
 
     <main class="main">
       <div class="topbar">
-  <button id="sidebarToggle" class="menu-toggle" aria-label="Toggle Menu">☰</button>
-  <h2 style="margin:0;color:var(--pink)">Dashboard Sumber Urip</h2>
+        <div>
+          <h2 style="margin:0;color:var(--pink)">Dashboard & Kasir</h2>
+          <div class="kicker">Satu file — responsive — dark soft pink</div>
+        </div>
         <div style="display:flex;gap:8px;align-items:center">
           <div class="kicker muted" id="roleLabel">-</div>
         </div>
@@ -1083,25 +1137,42 @@
   window.addEventListener('error', e => { console.error(e); showToast('Error (cek console)'); });
 
   </script>
-  <script>
-  const sidebar = document.getElementById('sidebar');
-  const sidebarToggle = document.getElementById('sidebarToggle');
+  // Tempatkan kode ini di bagian bawah </body>, sebelum tag penutup
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const sidebar = document.getElementById('sidebar');
+    const toggleButton = document.getElementById('sidebarToggle');
 
-  // Buat overlay
-  const overlay = document.createElement('div');
-  overlay.className = 'overlay';
-  document.body.appendChild(overlay);
+    if (toggleButton && sidebar) {
+      toggleButton.addEventListener('click', function() {
+        const isOpened = sidebar.classList.toggle('sidebar-open');
+        
+        // Update teks tombol dan ARIA attributes
+        if (isOpened) {
+          toggleButton.textContent = 'Sembunyikan Menu';
+          toggleButton.setAttribute('aria-expanded', 'true');
+        } else {
+          toggleButton.textContent = 'Tampilkan Menu';
+          toggleButton.setAttribute('aria-expanded', 'false');
+        }
+      });
+      
+      // OPTIONAL: Tutup sidebar saat salah satu tombol navigasi diklik
+      const navButtons = document.querySelectorAll('#nav button');
+      navButtons.forEach(button => {
+        button.addEventListener('click', () => {
+          // Hanya tutup jika sedang dalam mode HP (sidebar-toggle terlihat)
+          if (window.innerWidth <= 1100) {
+              sidebar.classList.remove('sidebar-open');
+              toggleButton.textContent = 'Tampilkan Menu';
+              toggleButton.setAttribute('aria-expanded', 'false');
+          }
+        });
+      });
+    }
 
-  sidebarToggle.addEventListener('click', () => {
-    sidebar.classList.add('show');
-    overlay.classList.add('show');
-  });
-
-  overlay.addEventListener('click', () => {
-    sidebar.classList.remove('show');
-    overlay.classList.remove('show');
+    // Kode JavaScript Anda yang lain (Chart.js, Firebase, dll.) dapat ditempatkan di sini
   });
 </script>
-
 </body>
 </html>
