@@ -4,7 +4,6 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>JedaBisnis — Daftar Layanan Catatan Keuangan</title>
-<!-- Minimal reset + mobile-first styling -->
 <style>
   :root{
     --bg:#0b0f12; --card:#0f1720; --muted:#9aa6b2; --accent:#6ad3c6; --glass:rgba(255,255,255,0.04);
@@ -82,12 +81,11 @@
       </div>
     </div>
     <div class="profile" id="profileBox">
-      <button id="googleSignIn" class="btn">Login dengan Google</button>
+      <button id="googleSignInInitial" class="btn">Login dengan Google</button>
     </div>
   </header>
 
   <main>
-    <!-- LEFT: User form & progress -->
     <section>
       <div class="card" id="userArea" style="display:none">
         <div style="display:flex;gap:12px;align-items:center">
@@ -200,7 +198,6 @@
         </div>
       </div>
 
-      <!-- modal for project info -->
       <div id="modalProj" class="modal-back"><div class="modal">
         <h3>Informasi Project</h3>
         <div id="projInfo" class="small"></div>
@@ -209,7 +206,6 @@
 
     </section>
 
-    <!-- RIGHT: Dashboard summary / admin -->
     <aside>
       <div class="card" id="summaryCard">
         <h3>Ringkasan & Dashboard</h3>
@@ -253,14 +249,13 @@
   <footer>© JedaBisnis — Catatan Keuangan</footer>
 </div>
 
-<!-- Firebase SDK (modular v9 via CDN) -->
 <script type="module">
   // --------- CONFIG: ganti ini dengan config project Firebase-mu ----------
 const firebaseConfig = {
   apiKey: "AIzaSyD_4hkC5918dHoQEOqyZ7FHR02eHx25rzM",
   authDomain: "register-7883a.firebaseapp.com",
   projectId: "register-7883a",
-  storageBucket: "register-7883a.appspot.com",
+  storageBucket: "register-7883a.firebasestorage.app",
   messagingSenderId: "900344098901",
   appId: "1:900344098901:web:b95b608dacbac8285964dc",
   measurementId: "G-L3CGV1P69Y"
@@ -280,7 +275,8 @@ const firebaseConfig = {
   const db = getDatabase(app);
 
   // UI elems
-  const googleSignIn = document.getElementById('googleSignIn');
+  // Menggunakan googleSignInInitial untuk tombol yang ada di HTML statis
+  const googleSignInInitial = document.getElementById('googleSignInInitial'); 
   const profileBox = document.getElementById('profileBox');
   const userArea = document.getElementById('userArea');
   const userPhoto = document.getElementById('userPhoto');
@@ -317,13 +313,10 @@ const firebaseConfig = {
 
   // util: enable/disable register button
   function updateRegisterState(){
-    const biz = document.getElementById('bizName').value.trim();
-    const phone = document.getElementById('phone').value.trim();
-    const cat = document.getElementById('category').value;
-    const pay = document.getElementById('paymentMethod').value;
-    const orig = document.getElementById('priceOriginal').value.trim();
-    const disc = document.getElementById('priceDiscount').value.trim();
-    if(biz && phone && cat && pay && orig && disc && proofDataUrl){
+    const requiredFields = ['bizName', 'phone', 'category', 'paymentMethod', 'priceOriginal', 'priceDiscount'];
+    const allFieldsFilled = requiredFields.every(id => document.getElementById(id).value.trim());
+
+    if(allFieldsFilled && proofDataUrl){
       registerBtn.classList.remove('disabled');
       registerBtn.disabled = false;
     } else {
@@ -348,12 +341,17 @@ const firebaseConfig = {
     reader.readAsDataURL(f);
   });
 
-  // Sign in
-  googleSignIn.addEventListener('click', async ()=>{
-    try{
-      await signInWithPopup(auth, provider);
-    }catch(err){ console.error(err); alert('Gagal login: '+err.message) }
-  });
+  // Fungsi Sign in
+  async function handleSignIn() {
+      try{
+        await signInWithPopup(auth, provider);
+      }catch(err){ console.error(err); alert('Gagal login: '+err.message) }
+  }
+
+  // 📌 Perbaikan Login: Pasang listener ke tombol statis
+  if (googleSignInInitial) {
+    googleSignInInitial.addEventListener('click', handleSignIn);
+  }
 
   logoutBtn.addEventListener('click', async ()=>{
     await signOut(auth);
@@ -364,7 +362,7 @@ const firebaseConfig = {
     currentUser = user;
     if(user){
       // show profile / user area
-      googleSignIn.style.display = 'none';
+      if (googleSignInInitial) googleSignInInitial.style.display = 'none'; // Sembunyikan tombol statis
       userArea.style.display = 'block';
       userPhoto.src = user.photoURL || 'https://via.placeholder.com/120';
       userName.textContent = user.displayName || 'User';
@@ -382,23 +380,48 @@ const firebaseConfig = {
       // get user's orders count & latest order
       watchUserOrders(user.uid);
 
-      // show profile small left
+      // show profile small left (mengganti isi profileBox)
       profileBox.innerHTML = '<img src="'+(user.photoURL||'')+'" alt="p" style="width:36px;height:36px;border-radius:50%"><div style="display:flex;flex-direction:column;align-items:flex-end"><div style="font-weight:700">'+(user.displayName||'')+'</div><button id="logoutSmall" class="btn ghost" style="margin-top:4px">Logout</button></div>';
-      document.getElementById('logoutSmall').addEventListener('click', ()=> signOut(auth));
+      
+      // Pasang listener untuk tombol logout kecil
+      const logoutSmall = document.getElementById('logoutSmall');
+      if (logoutSmall) logoutSmall.addEventListener('click', ()=> signOut(auth));
+      
     } else {
       // logged out
-      googleSignIn.style.display = 'inline-block';
+      if (googleSignInInitial) googleSignInInitial.style.display = 'inline-block'; // Tampilkan tombol statis
       userArea.style.display = 'none';
-      profileBox.innerHTML = '<button id="googleSignIn" class="btn">Login dengan Google</button>';
-      document.getElementById('googleSignIn').addEventListener('click', async ()=>{ await signInWithPopup(auth, provider) });
+      // Kosongkan profileBox, tombol login statis akan muncul
+      profileBox.innerHTML = ''; 
+      
+      // ⚠️ Tambahkan kembali tombol login statis ke profileBox jika HTML awal di-overwrite oleh state `user`
+      // Karena HTML awal: <div id="profileBox"> <button id="googleSignInInitial"> </button> </div>
+      // dan saat login, profileBox.innerHTML di-timpa, maka saat logout, kita harus mengembalikan tombol login.
+      // Namun, karena sudah menggunakan googleSignInInitial, kita hanya perlu menampilkannya (done di atas). 
+      // Jika profileBox.innerHTML kosong, pastikan tombolnya sudah berada di luar profileBox atau tambahkan kembali.
+      // Berdasarkan HTML Anda, tombol awal ada di dalam profileBox. Karena profileBox.innerHTML = '' menghapusnya, 
+      // kita harus menambahkannya kembali dan memasang listener, atau mengubah struktur HTML.
+      
+      // SOLUSI: Mengganti googleSignInInitial dengan tombol baru di dalam profileBox yang memiliki listener
+      profileBox.innerHTML = '<button id="googleSignInNew" class="btn">Login dengan Google</button>';
+      const googleSignInNew = document.getElementById('googleSignInNew');
+      if (googleSignInNew) googleSignInNew.addEventListener('click', handleSignIn);
+      
+      // Karena solusi ini sudah dilakukan di versi sebelumnya, kita pastikan lagi:
+      // Di state `if(user)`, `profileBox.innerHTML` menimpa tombol `googleSignInInitial`.
+      // Di state `else`, kita harus membuat tombol baru dan memasang `handleSignIn`.
+      // Logika ini sudah benar jika Anda menggunakan `profileBox.innerHTML = '...'`.
     }
   });
 
   // Register / create order
   registerBtn.addEventListener('click', async ()=>{
     if(!currentUser){ alert('Silakan login terlebih dahulu'); return; }
+    updateRegisterState(); // Re-check validation
     if(registerBtn.disabled) return;
     registerBtn.textContent = 'Mencatat...'; registerBtn.disabled = true;
+    
+    // ... data order
     const order = {
       uid: currentUser.uid,
       userName: currentUser.displayName || '',
@@ -417,13 +440,13 @@ const firebaseConfig = {
       adminNote: '',
       progressUpdatedAt: Date.now()
     };
+    
     try{
       const ordersRef = ref(db, 'orders');
       const newRef = push(ordersRef);
       await set(newRef, order);
       myLatestOrderId = newRef.key;
       alert('Pesanan terkirim. Tunggu konfirmasi admin.');
-      // reset form lightly (keep preview), update UI:
       loadMyLatestOrder(currentUser.uid);
     }catch(err){
       console.error(err);
@@ -514,6 +537,7 @@ const firebaseConfig = {
     });
   }
 
+  // 📌 Menggunakan handleAdminAction untuk mengelola semua aksi admin
   function renderAdminTable(arr){
     if(arr.length===0) { ordersTableWrap.innerHTML = '<div class="small hint">Belum ada pesanan.</div>'; return; }
     let html = '<table><thead><tr><th>Waktu</th><th>Nama / Bisnis</th><th>Email</th><th>Harga</th><th>Status</th><th>Aksi</th></tr></thead><tbody>';
@@ -526,11 +550,11 @@ const firebaseConfig = {
         <td><span class="badge ${o.status}">${o.status}</span></td>
         <td>
           <div class="admin-controls">
-            <button class="btn ghost" onclick="changeStatus('${o.id}','confirmed')">Confirm</button>
-            <button class="btn ghost" onclick="changeStatus('${o.id}','doing')">Start</button>
-            <button class="btn ghost" onclick="changeStatus('${o.id}','finished')">Finish</button>
-            <button class="btn ghost" onclick="viewOrderDetail('${o.id}')">Lihat</button>
-            <button class="btn ghost" onclick="deleteOrder('${o.id}')">Hapus</button>
+            <button class="btn ghost" data-id="${o.id}" data-status="confirmed" onclick="handleAdminAction(this)">Confirm</button>
+            <button class="btn ghost" data-id="${o.id}" data-status="doing" onclick="handleAdminAction(this)">Start</button>
+            <button class="btn ghost" data-id="${o.id}" data-status="finished" onclick="handleAdminAction(this)">Finish</button>
+            <button class="btn ghost" data-id="${o.id}" data-action="view" onclick="handleAdminAction(this)">Lihat</button>
+            <button class="btn ghost" data-id="${o.id}" data-action="delete" onclick="handleAdminAction(this)">Hapus</button>
           </div>
         </td>
       </tr>`;
@@ -540,39 +564,53 @@ const firebaseConfig = {
   }
 
   // expose functions to window for button onclick handlers inside generated HTML
-  window.changeStatus = async function(orderId, newStatus){
+  window.handleAdminAction = async function(el) {
+      const orderId = el.getAttribute('data-id');
+      const newStatus = el.getAttribute('data-status');
+      const action = el.getAttribute('data-action');
+
+      if (action === 'view') {
+          await viewOrderDetail(orderId);
+      } else if (action === 'delete') {
+          await deleteOrder(orderId);
+      } else if (newStatus) {
+          await changeStatus(orderId, newStatus);
+      }
+  };
+  
+  // Fungsi dipindahkan ke lingkup non-window, hanya `handleAdminAction` yang diekspos
+  async function changeStatus(orderId, newStatus){
     if(!confirm('Ubah status ke "'+newStatus+'"?')) return;
     const orderRef = ref(db, 'orders/' + orderId);
     await update(orderRef, { status: newStatus, progressUpdatedAt: Date.now() });
+    
     if(newStatus === 'finished'){
-      // ask admin to add note
       const adminNote = prompt('Tulis informasi / catatan project (akan tampil ke user):', '');
       if(adminNote!==null){
         await update(orderRef, { adminNote: adminNote });
       }
     }
     alert('Status diperbarui.');
-  };
+  }
 
-  window.viewOrderDetail = async function(orderId){
+  async function viewOrderDetail(orderId){
     const snap = await get(ref(db, 'orders/' + orderId));
     const o = snap.val();
     if(!o) return alert('Tidak ditemukan.');
-    // show detail in modal
+    
     let msg = `<div class="small"><strong>${escapeHtml(o.userName||'')}</strong> (${escapeHtml(o.userEmail||'')})<br/>Bisnis: ${escapeHtml(o.bizName||'')}<br/>No WA: ${escapeHtml(o.phone||'')}<br/>Kategori: ${escapeHtml(o.category||'')}<br/>Metode: ${escapeHtml(o.paymentMethod||'')}<br/>Harga: Rp ${escapeHtml(o.priceDiscount||o.priceOriginal||'0')}<br/>Status: ${escapeHtml(o.status||'')}<br/>Catatan Admin: ${escapeHtml(o.adminNote||'-')}</div>`;
-    // show proof image if exists
     if(o.proofBase64){
       msg += '<div style="margin-top:8px"><img class="file-preview" src="'+o.proofBase64+'"></div>';
     }
     modalProj.style.display = 'flex';
     projInfo.innerHTML = msg;
-  };
+  }
 
-  window.deleteOrder = async function(orderId){
+  async function deleteOrder(orderId){
     if(!confirm('Hapus pesanan ini? Tindakan tidak bisa dibatalkan.')) return;
     await remove(ref(db, 'orders/' + orderId));
     alert('Terhapus.');
-  };
+  }
 
   // helper escape
   function escapeHtml(s){
@@ -594,7 +632,6 @@ const firebaseConfig = {
 
   // small helper to watch single order change (if admin updates finished note)
   onValue(ref(db, 'orders'), snapshot=>{
-    // if current user's latest order exists, update preview admin note quickly
     if(currentUser && myLatestOrderId){
       const val = snapshot.val() || {};
       const order = val[myLatestOrderId];
@@ -608,13 +645,6 @@ const firebaseConfig = {
   window.addEventListener('beforeunload', function (e) {
     if(registerBtn && registerBtn.disabled && registerBtn.textContent.includes('Mencatat')) {
       e.preventDefault(); e.returnValue = '';
-    }
-  });
-
-  // UX: quick open detail if clicking badge (delegated)
-  document.addEventListener('click', function(e){
-    if(e.target && e.target.classList && e.target.classList.contains('badge') && e.target.textContent.trim().length>0){
-      // noop
     }
   });
 
