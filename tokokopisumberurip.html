@@ -236,7 +236,7 @@
         <button id="nav_kasir" aria-controls="view_kasir">🛒 Kasir</button>
         <button id="nav_products" aria-controls="view_products">🧾 Produk</button>
         <button id="nav_keuangan" aria-controls="view_keuangan">💼 Keuangan</button>
-        <button id="nav_users" aria-controls="view_users" class="admin-only" style="display:none;">👤 User</button>
+        <button id="nav_admin" aria-controls="view_admin" style="display:none;">👤 User</button>
         <!-- nav_bahan akan disisipkan otomatis jika belum ada -->
       </div>
 
@@ -492,22 +492,16 @@
       </section>
 
       <!-- ========== VIEW USER (KHUSUS ADMIN) ========== -->
-<section id="view_users" class="card hidden">
-  <h4 style="color:var(--pink);margin:0 0 8px 0">Manajemen User</h4>
-  <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
-    <div>
-      <div class="small-quiet">Daftar user sistem (hanya admin).</div>
-    </div>
-    <div style="display:flex;gap:8px;align-items:center">
-      <input id="searchUser" class="input-plain" placeholder="Cari user (email)" style="width:180px">
-      <button id="btnAddUser" class="btn">+ Tambah User</button>
-    </div>
+<!-- ADMIN PANEL -->
+<section id="view_admin" class="card hidden">
+  <h4 style="color:var(--pink);margin:0 0 8px 0">👑 Manajemen User</h4>
+  <div style="margin-bottom:10px;">
+    <button id="add_user_btn" class="btn" style="background:var(--pink);color:white;border:none;padding:6px 12px;border-radius:6px;cursor:pointer;">+ Tambah User</button>
+    <input type="text" id="search_user" placeholder="Cari user berdasarkan email..." style="margin-left:10px;padding:6px;border-radius:6px;border:1px solid #ccc;">
   </div>
-  <div style="margin-top:12px;max-height:420px;overflow:auto" class="table-wrap">
-    <table id="table_users">
-      <thead>
-        <tr><th>Email</th><th>Password</th><th>Aksi</th></tr>
-      </thead>
+  <div class="table-wrap" style="max-height:300px;overflow:auto;">
+    <table id="user_table" style="width:100%;border-collapse:collapse;">
+      <thead><tr><th>Email</th><th>Password (Reset)</th><th>Aksi</th></tr></thead>
       <tbody></tbody>
     </table>
   </div>
@@ -1711,6 +1705,94 @@ if (window.currentUser && window.currentUser.role === 'admin') {
 
  
 
+<script>
+firebase.auth().onAuthStateChanged((user) => {
+  if (!user) return;
+  const email = user.email;
+  console.log("Login sebagai:", email);
+
+  // Admin check
+  const isAdmin = email === "shysondiamond@gmail.com";
+  if (isAdmin) {
+    document.body.classList.add("is-admin");
+    document.getElementById("nav_admin").style.display = "inline-block";
+    loadUserTable();
+  }
+});
+
+// Load daftar user (dummy table, bisa diganti fetch dari Firebase)
+function loadUserTable(filter = "") {
+  const tbody = document.querySelector("#user_table tbody");
+  tbody.innerHTML = "";
+
+  // Nanti bisa dihubungkan dengan Realtime DB node 'users'
+  const usersRef = firebase.database().ref("users");
+  usersRef.once("value", (snapshot) => {
+    snapshot.forEach((child) => {
+      const data = child.val();
+      if (filter && !data.email.toLowerCase().includes(filter.toLowerCase())) return;
+
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${data.email}</td>
+        <td><button class="reset-btn" data-email="${data.email}" style="background:#ccc;padding:4px 8px;border:none;border-radius:4px;">Reset</button></td>
+        <td><button class="del-btn" data-id="${child.key}" style="background:#f66;color:white;padding:4px 8px;border:none;border-radius:4px;">Hapus</button></td>
+      `;
+      tbody.appendChild(tr);
+    });
+  });
+}
+
+// Filter realtime
+document.getElementById("search_user").addEventListener("input", (e) => {
+  loadUserTable(e.target.value);
+});
+
+// Tambah user
+document.getElementById("add_user_btn").onclick = async () => {
+  const email = prompt("Masukkan email user baru:");
+  const password = prompt("Masukkan password user:");
+
+  if (!email || !password) return alert("Email dan password wajib diisi.");
+
+  try {
+    // Simpan ke database (bukan Auth)
+    await firebase.database().ref("users").push({ email, password });
+    alert("User berhasil ditambahkan!");
+    loadUserTable();
+  } catch (err) {
+    alert("Gagal menambah user: " + err.message);
+  }
+};
+
+// Delegasi tombol Reset & Hapus
+document.addEventListener("click", async (e) => {
+  if (e.target.classList.contains("reset-btn")) {
+    const email = e.target.dataset.email;
+    const newPass = prompt(`Masukkan password baru untuk ${email}:`);
+    if (!newPass) return;
+    try {
+      const snapshot = await firebase.database().ref("users").orderByChild("email").equalTo(email).once("value");
+      snapshot.forEach((child) => {
+        firebase.database().ref("users/" + child.key).update({ password: newPass });
+      });
+      alert("Password berhasil diubah!");
+      loadUserTable();
+    } catch (err) {
+      alert("Gagal reset password: " + err.message);
+    }
+  }
+
+  if (e.target.classList.contains("del-btn")) {
+    const id = e.target.dataset.id;
+    if (confirm("Yakin ingin menghapus user ini?")) {
+      await firebase.database().ref("users/" + id).remove();
+      alert("User dihapus.");
+      loadUserTable();
+    }
+  }
+});
+</script>
 
 
 
