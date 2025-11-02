@@ -420,6 +420,47 @@
         
       </section>
 
+<!-- === USER MANAGEMENT (KHUSUS ADMIN) === -->
+<div id="userPanel" style="display:none;margin-top:20px;">
+  <h3>Manajemen User</h3>
+  <div class="user-actions">
+    <input type="text" id="userSearch" placeholder="Cari berdasarkan email..." style="padding:6px 10px;width:250px;">
+    <button id="btnAddUser" style="padding:6px 10px;">+ Tambah User</button>
+  </div>
+  <table id="userTable" border="1" cellpadding="6" cellspacing="0" style="width:100%;margin-top:10px;border-collapse:collapse;">
+    <thead style="background:#222;color:#fff;">
+      <tr>
+        <th>Email</th>
+        <th>Password</th>
+        <th>Role</th>
+        <th>Aksi</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+<!-- Modal Tambah/Edit User -->
+<div id="userModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;
+  background:rgba(0,0,0,.5);align-items:center;justify-content:center;z-index:9999;">
+  <div style="background:#fff;padding:20px;border-radius:10px;min-width:300px;max-width:400px;position:relative;">
+    <h4 id="userModalTitle">Tambah User</h4>
+    <label>Email:</label>
+    <input type="email" id="userEmail" style="width:100%;margin-bottom:10px;">
+    <label>Password:</label>
+    <input type="password" id="userPassword" style="width:100%;margin-bottom:10px;">
+    <label>Role:</label>
+    <select id="userRole" style="width:100%;margin-bottom:15px;">
+      <option value="kasir">Kasir</option>
+      <option value="admin">Admin</option>
+    </select>
+    <div style="display:flex;justify-content:space-between;">
+      <button id="userSaveBtn">Simpan</button>
+      <button id="userCancelBtn">Batal</button>
+    </div>
+  </div>
+</div>
+      
       <!-- KEUANGAN OVERVIEW -->
       <section id="view_keuangan" class="card hidden">
         <h4 style="color:var(--pink);margin:0 0 8px 0">Keuangan Overview</h4>
@@ -491,46 +532,7 @@
       <!-- Stok Bahan (akan diinsert otomatis oleh script) -->
 
     </main>
-    <!-- === USER MANAGEMENT (KHUSUS ADMIN) === -->
-<div id="userPanel" style="display:none;margin-top:20px;">
-  <h3>Manajemen User</h3>
-  <div class="user-actions">
-    <input type="text" id="userSearch" placeholder="Cari berdasarkan email..." style="padding:6px 10px;width:250px;">
-    <button id="btnAddUser" style="padding:6px 10px;">+ Tambah User</button>
-  </div>
-  <table id="userTable" border="1" cellpadding="6" cellspacing="0" style="width:100%;margin-top:10px;border-collapse:collapse;">
-    <thead style="background:#222;color:#fff;">
-      <tr>
-        <th>Email</th>
-        <th>Password</th>
-        <th>Role</th>
-        <th>Aksi</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-</div>
-
-<!-- Modal Tambah/Edit User -->
-<div id="userModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;
-  background:rgba(0,0,0,.5);align-items:center;justify-content:center;z-index:9999;">
-  <div style="background:#fff;padding:20px;border-radius:10px;min-width:300px;max-width:400px;position:relative;">
-    <h4 id="userModalTitle">Tambah User</h4>
-    <label>Email:</label>
-    <input type="email" id="userEmail" style="width:100%;margin-bottom:10px;">
-    <label>Password:</label>
-    <input type="password" id="userPassword" style="width:100%;margin-bottom:10px;">
-    <label>Role:</label>
-    <select id="userRole" style="width:100%;margin-bottom:15px;">
-      <option value="kasir">Kasir</option>
-      <option value="admin">Admin</option>
-    </select>
-    <div style="display:flex;justify-content:space-between;">
-      <button id="userSaveBtn">Simpan</button>
-      <button id="userCancelBtn">Batal</button>
-    </div>
-  </div>
-</div>
+    
   </div>
 
   <!-- TOAST -->
@@ -1211,6 +1213,60 @@ function snapToAOA(snap, cols) {
       if(!checkAdmin()) return;
       const id = e.target.dataset.id; openProductModal({ mode: 'edit', id });
     }));
+
+
+
+
+
+    async function loadUsers() {
+  if (!checkAdmin()) return;
+  const snap = await db.ref('users').once('value');
+  const tbody = document.querySelector('#table_users tbody');
+  tbody.innerHTML = '';
+  snap.forEach(ch => {
+    const d = ch.val();
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><input value="${d.email}" data-id="${ch.key}" class="email-input input-plain"/></td>
+      <td><input type="password" value="${d.password || ''}" data-id="${ch.key}" class="pass-input input-plain"/></td>
+      <td>
+        <button class="btn small save" data-id="${ch.key}" style="padding:4px 8px">💾 Simpan</button>
+        <button class="btn small del" data-id="${ch.key}" style="padding:4px 8px;background:#1a2330;color:#e7eef8">🗑 Hapus</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  tbody.querySelectorAll('.save').forEach(btn => btn.addEventListener('click', async e => {
+    const id = e.target.dataset.id;
+    const email = document.querySelector(`.email-input[data-id="${id}"]`).value.trim();
+    const password = document.querySelector(`.pass-input[data-id="${id}"]`).value.trim();
+    if (!email || !password) return showToast('Lengkapi email & password');
+    await db.ref('users/' + id).update({ email, password });
+    showToast('User diperbarui');
+  }));
+
+  tbody.querySelectorAll('.del').forEach(btn => btn.addEventListener('click', async e => {
+    const id = e.target.dataset.id;
+    if (!confirm('Hapus user ini?')) return;
+    await db.ref('users/' + id).remove();
+    showToast('User dihapus');
+    loadUsers();
+  }));
+}
+
+// tombol tambah user
+$('btnAddUser').addEventListener('click', async () => {
+  if (!checkAdmin()) return;
+  const email = prompt('Masukkan email user baru:');
+  const password = prompt('Masukkan password user:');
+  if (!email || !password) return showToast('Email & password wajib diisi');
+  const id = db.ref('users').push().key;
+  await db.ref('users/' + id).set({ email, password });
+  showToast('User ditambahkan');
+  loadUsers();
+});
+
   }
 
   /***** Modal logic for add/edit product (dengan editor komposisi row-by-row) *****/
@@ -1634,110 +1690,7 @@ function snapToAOA(snap, cols) {
 
 
 
-  document.addEventListener('DOMContentLoaded',()=>{
-  const userPanel=document.getElementById('userPanel');
-  const userTable=document.getElementById('userTable').querySelector('tbody');
-  const userModal=document.getElementById('userModal');
-  const userModalTitle=document.getElementById('userModalTitle');
-  const userEmail=document.getElementById('userEmail');
-  const userPassword=document.getElementById('userPassword');
-  const userRole=document.getElementById('userRole');
-  const userSaveBtn=document.getElementById('userSaveBtn');
-  const userCancelBtn=document.getElementById('userCancelBtn');
-  const userSearch=document.getElementById('userSearch');
-  const btnAddUser=document.getElementById('btnAddUser');
-
-  let editingUserId=null;
-  const currentUser=window.currentUser||{}; // variabel user login aktif
-
-  // === hanya admin bisa lihat panel ===
-  if(currentUser.role==='admin'){
-    userPanel.style.display='block';
-    loadUsers();
-  }
-
-  async function loadUsers(){
-    const snap=await db.ref('users').once('value');
-    const users=snap.val()||{};
-    renderUsers(Object.entries(users));
-  }
-
-  function renderUsers(list){
-    userTable.innerHTML='';
-    list.forEach(([id,u])=>{
-      const tr=document.createElement('tr');
-      tr.innerHTML=`
-        <td>${u.email}</td>
-        <td>${u.password}</td>
-        <td>${u.role||'kasir'}</td>
-        <td>
-          <button class="editUser" data-id="${id}">Edit</button>
-          <button class="delUser" data-id="${id}">Hapus</button>
-        </td>`;
-      userTable.appendChild(tr);
-    });
-  }
-
-  userSearch.addEventListener('input',async()=>{
-    const q=userSearch.value.trim().toLowerCase();
-    const snap=await db.ref('users').once('value');
-    const users=snap.val()||{};
-    const filtered=Object.entries(users).filter(([id,u])=>u.email.toLowerCase().includes(q));
-    renderUsers(filtered);
-  });
-
-  btnAddUser.onclick=()=>{
-    editingUserId=null;
-    userModalTitle.textContent='Tambah User';
-    userEmail.value='';
-    userPassword.value='';
-    userRole.value='kasir';
-    userModal.style.display='flex';
-  };
-
-  userCancelBtn.onclick=()=>userModal.style.display='none';
-
-  userSaveBtn.onclick=async()=>{
-    const email=userEmail.value.trim();
-    const password=userPassword.value.trim();
-    const role=userRole.value;
-    if(!email||!password)return showToast('Isi semua field');
-    try{
-      if(editingUserId){
-        await db.ref('users/'+editingUserId).update({email,password,role});
-        showToast('User diperbarui');
-      }else{
-        const newRef=db.ref('users').push();
-        await newRef.set({email,password,role});
-        showToast('User ditambahkan');
-      }
-      userModal.style.display='none';
-      loadUsers();
-    }catch(e){console.error(e);showToast('Gagal menyimpan user');}
-  };
-
-  userTable.addEventListener('click',async(e)=>{
-    const t=e.target;
-    const id=t.dataset.id;
-    if(t.classList.contains('editUser')){
-      const snap=await db.ref('users/'+id).once('value');
-      const u=snap.val();
-      editingUserId=id;
-      userModalTitle.textContent='Edit User';
-      userEmail.value=u.email;
-      userPassword.value=u.password;
-      userRole.value=u.role||'kasir';
-      userModal.style.display='flex';
-    }
-    if(t.classList.contains('delUser')){
-      if(confirm('Hapus user ini?')){
-        await db.ref('users/'+id).remove();
-        showToast('User dihapus');
-        loadUsers();
-      }
-    }
-  });
-});
+  
 
 </script>
 
