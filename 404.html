@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - Halaman Tidak Ditemukan</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+:root {
+    --primary-color: #f75d59; /* Warna Merah/Pink */
+    --secondary-color: #3f3d56; /* Warna Teks Gelap */
+    --bg-color: #f0f2f5; /* Warna Latar Belakang Ringan */
+}
+
+/* Reset dan Font Dasar */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: var(--bg-color);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+    color: var(--secondary-color);
+}
+
+/* Container Utama */
+.container {
+    background-color: #ffffff;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    max-width: 700px;
+    width: 100%;
+    overflow: hidden;
+    padding: 60px 40px;
+    text-align: center;
+}
+
+/* Konten Utama */
+.error-content {
+    display: flex;
+    flex-direction: column; /* Tata letak vertikal untuk mobile */
+    align-items: center;
+    width: 100%;
+}
+
+/* Kotak Angka Error */
+.error-box {
+    background-color: var(--primary-color);
+    padding: 10px 30px;
+    border-radius: 10px;
+    margin-bottom: 30px;
+}
+
+.error-number {
+    font-size: 8rem; /* Angka besar */
+    font-weight: 900;
+    color: #ffffff;
+    line-height: 1;
+}
+
+.error-text {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: 2px;
+    margin-top: 5px;
+}
+
+/* Area Pesan */
+.message-area h1 {
+    font-size: 2rem;
+    margin-bottom: 15px;
+    font-weight: 700;
+    color: var(--secondary-color);
+}
+
+.message-area p {
+    font-size: 1rem;
+    margin-bottom: 30px;
+    color: #6c757d;
+}
+
+/* Tombol */
+.btn-home {
+    display: inline-block;
+    padding: 12px 30px;
+    background-color: var(--primary-color);
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    font-weight: 600;
+    transition: background-color 0.3s ease;
+}
+
+.btn-home:hover {
+    background-color: #e64c4c;
+}
+
+/* --- Responsiveness (Media Query) --- */
+@media (min-width: 600px) {
+    /* Pada layar yang lebih lebar, atur angka dan pesan bersebelahan 
+       (atau biarkan vertikal untuk kesan yang lebih baik) 
+       Dalam kasus ini, kita akan mempertahankan tata letak vertikal untuk fokus
+       tetapi meningkatkan ukuran teks.
+    */
+    .container {
+        padding: 80px 60px;
+    }
+
+    .error-number {
+        font-size: 10rem;
+    }
+
+    .message-area h1 {
+        font-size: 2.5rem;
+    }
+}
+</style>
+</head>
+<body>
+    <div class="container">
+        <div class="error-content">
+            <div class="error-box">
+                <div class="error-number">404</div>
+                <div class="error-text">HALAMAN TIDAK DITEMUKAN</div>
+            </div>
+            
+            <div class="message-area">
+                <h1>Oops! Anda Tersesat.</h1>
+                <p>Kami tidak dapat menemukan alamat yang Anda cari. Silakan periksa kembali tautan yang Anda masukkan.</p>
+                <a href="/" class="btn-home">Kembali ke Beranda</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
