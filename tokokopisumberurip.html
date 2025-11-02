@@ -495,16 +495,15 @@
 <!-- ADMIN PANEL -->
 <section id="view_admin" class="card hidden">
   <h4 style="color:var(--pink);margin:0 0 8px 0">👑 Manajemen User</h4>
-  <div style="margin-bottom:10px;">
-    <button id="add_user_btn" class="btn" style="background:var(--pink);color:white;border:none;padding:6px 12px;border-radius:6px;cursor:pointer;">+ Tambah User</button>
-    <input type="text" id="search_user" placeholder="Cari user berdasarkan email..." style="margin-left:10px;padding:6px;border-radius:6px;border:1px solid #ccc;">
+  <div>
+    <p>Mohon maaf fitur ini masih dalam pengembangan. Anda dapat melihat data user dan menambah data User dengan menghubungi kami di bawah sini (Anda Harus Chat Admin, bukan yang lain!)</p>
+    <div style="position:fixed;top:0;left:0;width:100%;height:100%;">
+  <iframe src="https://www.jeda.my.id/p/forum.html" 
+          style="width:100%;height:100%;border:none;"></iframe>
+</div>
+
   </div>
-  <div class="table-wrap" style="max-height:300px;overflow:auto;">
-    <table id="user_table" style="width:100%;border-collapse:collapse;">
-      <thead><tr><th>Email</th><th>Password (Reset)</th><th>Aksi</th></tr></thead>
-      <tbody></tbody>
-    </table>
-  </div>
+  
 </section>
 
 
@@ -1604,43 +1603,7 @@ if (navAdmin) {
 </script>
 
 
-<script>
-  if ("serviceWorker" in navigator) {
-    window.addEventListener("load", () => {
-      navigator.serviceWorker
-        .register("/Catatan-Keuangan-/sw.js")
-        .then(reg => {
-          console.log("✅ Service Worker ready:", reg.scope);
 
-          // Notifikasi saat offline
-          window.addEventListener("offline", () => {
-            if (navigator.serviceWorker.controller) {
-              navigator.serviceWorker.controller.postMessage("offline-notice");
-            }
-          });
-
-          // Auto update kalau ada SW baru
-          reg.onupdatefound = () => {
-            const newWorker = reg.installing;
-            newWorker.onstatechange = () => {
-              if (newWorker.state === "installed" && navigator.serviceWorker.controller) {
-                console.log("🔄 Versi baru tersedia, memuat ulang...");
-                window.location.reload();
-              }
-            };
-          };
-        })
-        .catch(err => console.log("❌ SW gagal:", err));
-    });
-  }
-
-
-
-
-
-  
-
-</script>
 
  
 
