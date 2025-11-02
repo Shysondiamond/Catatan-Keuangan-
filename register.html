@@ -222,17 +222,20 @@ document.getElementById("googleLogin").onclick=async()=>{
   }catch(e){console.error(e);}
 };
 
-function checkRole(user){
+function checkRole(user) {
+  // Pastikan login hilang dulu
   authSection.classList.add("hidden");
-  document.querySelector(".container").style.maxWidth="1000px";
-  if(adminEmails.includes(user.email)){
+  document.querySelector(".container").style.maxWidth = "1000px";
+
+  if (adminEmails.includes(user.email)) {
     adminSection.classList.remove("hidden");
     loadOrders();
-  }else{
+  } else {
     registerSection.classList.remove("hidden");
     loadUserOrder(user.email);
   }
 }
+
 
 daftarBtn.onclick=()=>{
   const nama=document.getElementById("namaBisnis").value;
@@ -324,7 +327,19 @@ window.showInfo=id=>{
 };
 
 window.closePopup=()=>popup.classList.add("hidden");
-auth.onAuthStateChanged(u=>{if(u)checkRole(u);});
+auth.onAuthStateChanged(user => {
+  if (user) {
+    // Sembunyikan login dan tampilkan bagian sesuai role
+    authSection.classList.add("hidden");
+    checkRole(user);
+  } else {
+    // Jika belum login, tampilkan halaman login saja
+    authSection.classList.remove("hidden");
+    registerSection.classList.add("hidden");
+    adminSection.classList.add("hidden");
+  }
+});
+
 </script>
 </body>
 </html>
