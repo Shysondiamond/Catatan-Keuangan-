@@ -17,6 +17,7 @@
       align-items: center;
       min-height: 100vh;
       flex-direction: column;
+      margin: 0;
     }
 
     .card {
@@ -31,6 +32,7 @@
 
     h1 {
       color: #ff85c1;
+      margin-bottom: 1rem;
     }
 
     input {
@@ -51,6 +53,7 @@
       border-radius: 6px;
       cursor: pointer;
       margin-top: 10px;
+      transition: 0.2s;
     }
 
     button:hover {
@@ -78,6 +81,28 @@
       border-radius: 8px;
       margin-top: 8px;
     }
+
+    #loginBtn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-weight: 600;
+      font-size: 15px;
+    }
+
+    #user-info {
+      text-align: left;
+      margin-bottom: 10px;
+    }
+
+    #user-photo {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      vertical-align: middle;
+      margin-right: 8px;
+    }
   </style>
 </head>
 <body>
@@ -85,14 +110,22 @@
   <!-- LOGIN SECTION -->
   <section id="login-section" class="card">
     <h1>JedaBisnis</h1>
-    <button id="loginBtn">🔑 Login dengan Google</button>
-    <p style="margin-top:10px;">Silakan login untuk mengakses dashboard Anda.</p>
+    <button id="loginBtn">
+      <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20" height="20" />
+      Login dengan Google
+    </button>
+    <p style="margin-top:10px;">Silakan login untuk mendaftar bisnis baru atau mengakses dashboard Anda.</p>
   </section>
 
   <!-- DASHBOARD SECTION -->
   <section id="dashboard-section" class="card">
-    <h1>Dashboard Admin</h1>
+    <div id="user-info">
+      <img id="user-photo" src="" alt="User">
+      <span id="user-name"></span>
+    </div>
     <button id="logoutBtn" style="float:right;">Logout</button>
+
+    <h1>Dashboard Admin</h1>
 
     <h3>Tambah Bisnis Baru</h3>
     <input id="namaBisnis" placeholder="Nama Bisnis" />
@@ -130,6 +163,7 @@
       appId: "ISI_APP_ID"
     };
     firebase.initializeApp(firebaseConfig);
+
     const db = firebase.database();
     const auth = firebase.auth();
 
@@ -139,6 +173,8 @@
     const logoutBtn = document.getElementById('logoutBtn');
     const daftarBtn = document.getElementById('daftarBtn');
     const businessList = document.getElementById('businessList');
+    const userPhoto = document.getElementById('user-photo');
+    const userName = document.getElementById('user-name');
 
     // === LOGIN GOOGLE ===
     loginBtn.onclick = () => {
@@ -147,16 +183,16 @@
     };
 
     // === LOGOUT ===
-    logoutBtn.onclick = () => {
-      auth.signOut();
-    };
+    logoutBtn.onclick = () => auth.signOut();
 
-    // === PANTAU STATUS LOGIN ===
+    // === STATUS LOGIN ===
     auth.onAuthStateChanged(user => {
       if (user) {
         loginSection.style.display = 'none';
         dashboardSection.style.display = 'block';
         logoutBtn.style.display = 'inline-block';
+        userPhoto.src = user.photoURL;
+        userName.textContent = user.displayName;
         loadBisnis();
       } else {
         loginSection.style.display = 'block';
@@ -167,41 +203,37 @@
 
     // === TAMBAH BISNIS BARU ===
     daftarBtn.onclick = async () => {
-      const nama = document.getElementById('namaBisnis').value;
-      const jenis = document.getElementById('jenisBisnis').value;
-      const telp = document.getElementById('nomorTelepon').value;
+      const user = auth.currentUser;
+      if (!user) return alert("Silakan login dulu!");
+
+      const nama = document.getElementById('namaBisnis').value.trim();
+      const jenis = document.getElementById('jenisBisnis').value.trim();
+      const telp = document.getElementById('nomorTelepon').value.trim();
       const fileInput = document.getElementById('buktiPembayaran');
 
-      if (!nama || !jenis || !telp) {
-        alert("Harap isi semua data bisnis!");
-        return;
-      }
+      if (!nama || !jenis || !telp) return alert("Harap isi semua data bisnis!");
+      if (!fileInput.files[0]) return alert("Harap unggah bukti pembayaran.");
 
-      let buktiBase64 = "";
-      if (fileInput.files[0]) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          buktiBase64 = e.target.result;
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        const buktiBase64 = e.target.result;
+        const newRef = db.ref('bisnis').push();
+        await newRef.set({
+          nama,
+          jenis,
+          telp,
+          bukti: buktiBase64,
+          status: "Menunggu Konfirmasi",
+          pemilik: user.email
+        });
 
-          const newRef = db.ref('bisnis').push();
-          newRef.set({
-            nama,
-            jenis,
-            telp,
-            bukti: buktiBase64,
-            status: "Menunggu Konfirmasi",
-            pemilik: auth.currentUser.email
-          });
-          alert("Bisnis berhasil didaftarkan!");
-          fileInput.value = '';
-          document.getElementById('namaBisnis').value = '';
-          document.getElementById('jenisBisnis').value = '';
-          document.getElementById('nomorTelepon').value = '';
-        };
-        reader.readAsDataURL(fileInput.files[0]);
-      } else {
-        alert("Harap unggah bukti pembayaran.");
-      }
+        alert("Bisnis berhasil didaftarkan!");
+        fileInput.value = '';
+        document.getElementById('namaBisnis').value = '';
+        document.getElementById('jenisBisnis').value = '';
+        document.getElementById('nomorTelepon').value = '';
+      };
+      reader.readAsDataURL(fileInput.files[0]);
     };
 
     // === MUAT DATA BISNIS ===
