@@ -6,8 +6,8 @@ const urlsToCache = [
   "/Catatan-Keuangan-/",
   "/Catatan-Keuangan-/index.html",
   "/Catatan-Keuangan-/manifest.json",
-  "/Catatan-Keuangan-/icon-192.png",
-  "/Catatan-Keuangan-/icon-512.png"
+  "/Catatan-Keuangan-/192x192.png",
+  "/Catatan-Keuangan-/512x512.png"
 ];
 
 // Install SW dan cache file awal
@@ -68,7 +68,7 @@ self.addEventListener("message", event => {
   if (event.data === "offline-notice") {
     self.registration.showNotification("Catatan Keuangan", {
       body: "Kamu sedang offline. Beberapa fitur mungkin tidak tersedia.",
-      icon: "/Catatan-Keuangan-/icons/icon-192.png"
+      icon: "/Catatan-Keuangan-/192x192.png"
     });
   }
 });
