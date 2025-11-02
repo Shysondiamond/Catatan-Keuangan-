@@ -1,51 +1,74 @@
-// Nama cache dan daftar file yang ingin disimpan offline
-const CACHE_NAME = "catatan-keuangan-v1";
+// Versi cache - ubah setiap kali kamu update situs
+const CACHE_NAME = "catatan-keuangan-v2";
+
+// Daftar file yang mau disimpan offline
 const urlsToCache = [
   "/Catatan-Keuangan-/",
   "/Catatan-Keuangan-/index.html",
   "/Catatan-Keuangan-/manifest.json",
-  "/Catatan-Keuangan-/icons/icon-192.png",
-  "/Catatan-Keuangan-/icons/icon-512.png"
+  "/Catatan-Keuangan-/icon-192.png",
+  "/Catatan-Keuangan-/icon-512.png"
 ];
 
-// Install Service Worker dan simpan file ke cache
+// Install SW dan cache file awal
 self.addEventListener("install", event => {
+  console.log("[SW] Installing...");
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => {
-      console.log("Service Worker: caching files");
+      console.log("[SW] Caching app shell");
       return cache.addAll(urlsToCache);
     })
   );
   self.skipWaiting();
 });
 
-// Aktifkan SW baru dan hapus cache lama
+// Activate SW baru dan hapus cache lama
 self.addEventListener("activate", event => {
+  console.log("[SW] Activating new version...");
   event.waitUntil(
-    caches.keys().then(cacheNames => {
-      return Promise.all(
-        cacheNames.map(cache => {
-          if (cache !== CACHE_NAME) {
-            console.log("Service Worker: deleting old cache", cache);
-            return caches.delete(cache);
+    caches.keys().then(keys =>
+      Promise.all(
+        keys.map(key => {
+          if (key !== CACHE_NAME) {
+            console.log("[SW] Removing old cache:", key);
+            return caches.delete(key);
           }
         })
-      );
-    })
+      )
+    )
   );
   self.clients.claim();
 });
 
-// Tangani fetch (ambil dari cache dulu, kalau gagal baru ke jaringan)
+// Fetch handler - offline fallback + auto update
 self.addEventListener("fetch", event => {
   event.respondWith(
-    caches.match(event.request).then(response => {
-      return (
-        response ||
-        fetch(event.request).catch(() =>
-          caches.match("/Catatan-Keuangan-/index.html")
-        )
-      );
-    })
+    fetch(event.request)
+      .then(response => {
+        // Simpan ke cache versi terbaru
+        const responseClone = response.clone();
+        caches.open(CACHE_NAME).then(cache => cache.put(event.request, responseClone));
+        return response;
+      })
+      .catch(() => {
+        // Kalau offline, coba ambil dari cache
+        return caches.match(event.request).then(response => {
+          if (response) return response;
+          // Fallback ke index.html untuk halaman utama
+          if (event.request.mode === "navigate") {
+            return caches.match("/Catatan-Keuangan-/index.html");
+          }
+        });
+      })
   );
+});
+
+// Kirim notifikasi kecil kalau user offline
+self.addEventListener("message", event => {
+  if (event.data === "offline-notice") {
+    self.registration.showNotification("Catatan Keuangan", {
+      body: "Kamu sedang offline. Beberapa fitur mungkin tidak tersedia.",
+      icon: "/Catatan-Keuangan-/icons/icon-192.png"
+    });
+  }
 });
