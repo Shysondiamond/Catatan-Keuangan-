@@ -496,10 +496,14 @@
 <section id="view_admin" class="card hidden">
   <h4 style="color:var(--pink);margin:0 0 8px 0">👑 Manajemen User</h4>
   <div>
-    <p>Mohon maaf fitur ini masih dalam pengembangan. Anda dapat melihat data user dan menambah data User dengan menghubungi kami di bawah sini (Anda Harus Chat Admin, bukan yang lain!)</p>
+    <p>Mohon maaf fitur ini masih dalam pengembangan. Anda dapat melihat data user dan menambah data User dengan menghubungi kami di bawah sini!</p>
+    <ol>
+    <li>klik url berikut <a href='https://www.jeda.my.id/p/forum.html'>https://www.jeda.my.id/p/forum.html</a></li>
+      <li>Cari Nama Pengguna "Admin"</li>
+      <li>Chat Admin dengan <span style='color:red;'><i></i>Hai Admin saya dari JedaBisnis ingin ..... (menlihat data user/menambah user kasir/admin)</i></span></li>
+      <li>Admin akan menanggapi dalam waktu paling lambat 24jam</li>
+      </ol>
     <div style="position:fixed;top:0;left:0;width:100%;height:100%;">
-  <iframe src="https://www.jeda.my.id/p/forum.html" 
-          style="width:100%;height:100%;border:none;"></iframe>
 </div>
 
   </div>
@@ -1622,78 +1626,7 @@ firebase.auth().onAuthStateChanged((user) => {
   }
 });
 
-// Load daftar user (dummy table, bisa diganti fetch dari Firebase)
-function loadUserTable(filter = "") {
-  const tbody = document.querySelector("#user_table tbody");
-  tbody.innerHTML = "";
 
-  // Nanti bisa dihubungkan dengan Realtime DB node 'users'
-  const usersRef = firebase.database().ref("users");
-  usersRef.once("value", (snapshot) => {
-    snapshot.forEach((child) => {
-      const data = child.val();
-      if (filter && !data.email.toLowerCase().includes(filter.toLowerCase())) return;
-
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td>${data.email}</td>
-        <td><button class="reset-btn" data-email="${data.email}" style="background:#ccc;padding:4px 8px;border:none;border-radius:4px;">Reset</button></td>
-        <td><button class="del-btn" data-id="${child.key}" style="background:#f66;color:white;padding:4px 8px;border:none;border-radius:4px;">Hapus</button></td>
-      `;
-      tbody.appendChild(tr);
-    });
-  });
-}
-
-// Filter realtime
-document.getElementById("search_user").addEventListener("input", (e) => {
-  loadUserTable(e.target.value);
-});
-
-// Tambah user
-document.getElementById("add_user_btn").onclick = async () => {
-  const email = prompt("Masukkan email user baru:");
-  const password = prompt("Masukkan password user:");
-
-  if (!email || !password) return alert("Email dan password wajib diisi.");
-
-  try {
-    // Simpan ke database (bukan Auth)
-    await firebase.database().ref("users").push({ email, password });
-    alert("User berhasil ditambahkan!");
-    loadUserTable();
-  } catch (err) {
-    alert("Gagal menambah user: " + err.message);
-  }
-};
-
-// Delegasi tombol Reset & Hapus
-document.addEventListener("click", async (e) => {
-  if (e.target.classList.contains("reset-btn")) {
-    const email = e.target.dataset.email;
-    const newPass = prompt(`Masukkan password baru untuk ${email}:`);
-    if (!newPass) return;
-    try {
-      const snapshot = await firebase.database().ref("users").orderByChild("email").equalTo(email).once("value");
-      snapshot.forEach((child) => {
-        firebase.database().ref("users/" + child.key).update({ password: newPass });
-      });
-      alert("Password berhasil diubah!");
-      loadUserTable();
-    } catch (err) {
-      alert("Gagal reset password: " + err.message);
-    }
-  }
-
-  if (e.target.classList.contains("del-btn")) {
-    const id = e.target.dataset.id;
-    if (confirm("Yakin ingin menghapus user ini?")) {
-      await firebase.database().ref("users/" + id).remove();
-      alert("User dihapus.");
-      loadUserTable();
-    }
-  }
-});
 </script>
 
 
