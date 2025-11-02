@@ -357,62 +357,80 @@ const firebaseConfig = {
     await signOut(auth);
   });
 
-  // Listen auth changes
-  onAuthStateChanged(auth, async user=>{
-    currentUser = user;
-    if(user){
-      // show profile / user area
-      if (googleSignInInitial) googleSignInInitial.style.display = 'none'; // Sembunyikan tombol statis
-      userArea.style.display = 'block';
-      userPhoto.src = user.photoURL || 'https://via.placeholder.com/120';
-      userName.textContent = user.displayName || 'User';
-      userEmail.textContent = user.email || '';
-      emailField.value = user.email || '';
+ // ... (Bagian UI elems tetap sama)
 
-      // if admin show admin panel
-      if(ADMIN_EMAILS.includes(user.email)){
-        adminPanel.style.display = 'block';
-        loadAllOrders();
-      } else {
-        adminPanel.style.display = 'none';
-      }
-
-      // get user's orders count & latest order
-      watchUserOrders(user.uid);
-
-      // show profile small left (mengganti isi profileBox)
-      profileBox.innerHTML = '<img src="'+(user.photoURL||'')+'" alt="p" style="width:36px;height:36px;border-radius:50%"><div style="display:flex;flex-direction:column;align-items:flex-end"><div style="font-weight:700">'+(user.displayName||'')+'</div><button id="logoutSmall" class="btn ghost" style="margin-top:4px">Logout</button></div>';
-      
-      // Pasang listener untuk tombol logout kecil
-      const logoutSmall = document.getElementById('logoutSmall');
-      if (logoutSmall) logoutSmall.addEventListener('click', ()=> signOut(auth));
-      
-    } else {
-      // logged out
-      if (googleSignInInitial) googleSignInInitial.style.display = 'inline-block'; // Tampilkan tombol statis
-      userArea.style.display = 'none';
-      // Kosongkan profileBox, tombol login statis akan muncul
-      profileBox.innerHTML = ''; 
-      
-      // ⚠️ Tambahkan kembali tombol login statis ke profileBox jika HTML awal di-overwrite oleh state `user`
-      // Karena HTML awal: <div id="profileBox"> <button id="googleSignInInitial"> </button> </div>
-      // dan saat login, profileBox.innerHTML di-timpa, maka saat logout, kita harus mengembalikan tombol login.
-      // Namun, karena sudah menggunakan googleSignInInitial, kita hanya perlu menampilkannya (done di atas). 
-      // Jika profileBox.innerHTML kosong, pastikan tombolnya sudah berada di luar profileBox atau tambahkan kembali.
-      // Berdasarkan HTML Anda, tombol awal ada di dalam profileBox. Karena profileBox.innerHTML = '' menghapusnya, 
-      // kita harus menambahkannya kembali dan memasang listener, atau mengubah struktur HTML.
-      
-      // SOLUSI: Mengganti googleSignInInitial dengan tombol baru di dalam profileBox yang memiliki listener
-      profileBox.innerHTML = '<button id="googleSignInNew" class="btn">Login dengan Google</button>';
-      const googleSignInNew = document.getElementById('googleSignInNew');
-      if (googleSignInNew) googleSignInNew.addEventListener('click', handleSignIn);
-      
-      // Karena solusi ini sudah dilakukan di versi sebelumnya, kita pastikan lagi:
-      // Di state `if(user)`, `profileBox.innerHTML` menimpa tombol `googleSignInInitial`.
-      // Di state `else`, kita harus membuat tombol baru dan memasang `handleSignIn`.
-      // Logika ini sudah benar jika Anda menggunakan `profileBox.innerHTML = '...'`.
+// Fungsi Sign in
+async function handleSignIn() {
+    try{
+        await signInWithPopup(auth, provider);
+    }catch(err){ 
+        console.error("FIREBASE SIGN IN ERROR:", err); 
+        alert('Gagal login: '+err.message); 
     }
-  });
+}
+
+// HAPUS event listener ini dari awal, karena tombol ini akan segera ditimpa:
+// if (googleSignInInitial) {
+//   googleSignInInitial.addEventListener('click', handleSignIn);
+// }
+
+logoutBtn.addEventListener('click', async ()=>{
+    await signOut(auth);
+});
+
+// Listen auth changes
+onAuthStateChanged(auth, async user=>{
+    currentUser = user;
+    
+    // 1. Kosongkan profileBox terlebih dahulu untuk mempersiapkan tampilan
+    profileBox.innerHTML = '';
+
+    if(user){
+        // --- KETIKA USER LOGIN ---
+        
+        userArea.style.display = 'block';
+        userPhoto.src = user.photoURL || 'https://via.placeholder.com/120';
+        userName.textContent = user.displayName || 'User';
+        userEmail.textContent = user.email || '';
+        emailField.value = user.email || '';
+
+        // Tampilkan info profile kecil di header
+        profileBox.innerHTML = `
+            <img src="${user.photoURL||''}" alt="p" style="width:36px;height:36px;border-radius:50%">
+            <div style="display:flex;flex-direction:column;align-items:flex-end">
+                <div style="font-weight:700">${user.displayName||''}</div>
+                <button id="logoutSmall" class="btn ghost" style="margin-top:4px">Logout</button>
+            </div>`;
+        
+        // Pasang listener untuk tombol logout kecil yang BARU dibuat
+        const logoutSmall = document.getElementById('logoutSmall');
+        if (logoutSmall) logoutSmall.addEventListener('click', ()=> signOut(auth));
+
+        // Admin checks
+        if(ADMIN_EMAILS.includes(user.email)){
+            adminPanel.style.display = 'block';
+            loadAllOrders();
+        } else {
+            adminPanel.style.display = 'none';
+        }
+        
+        watchUserOrders(user.uid);
+        
+    } else {
+        // --- KETIKA USER LOGGED OUT / HALAMAN DIMUAT PERTAMA KALI ---
+        
+        userArea.style.display = 'none';
+        
+        // Buat TOMBOL LOGIN BARU di dalam profileBox
+        profileBox.innerHTML = '<button id="googleSignInNew" class="btn">Login dengan Google</button>';
+        
+        // Cari tombol yang BARU dibuat dan pasang listener-nya
+        const googleSignInNew = document.getElementById('googleSignInNew');
+        if (googleSignInNew) {
+            googleSignInNew.addEventListener('click', handleSignIn);
+        }
+    }
+});
 
   // Register / create order
   registerBtn.addEventListener('click', async ()=>{
