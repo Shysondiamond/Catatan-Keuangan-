@@ -1609,27 +1609,5 @@ if (navAdmin) {
 
 
 
- 
-
-<script>
-firebase.auth().onAuthStateChanged((user) => {
-  if (!user) return;
-  const email = user.email;
-  console.log("Login sebagai:", email);
-
-  // Admin check
-  const isAdmin = email === "shysondiamond@gmail.com";
-  if (isAdmin) {
-    document.body.classList.add("is-admin");
-    document.getElementById("nav_admin").style.display = "inline-block";
-    loadUserTable();
-  }
-});
-
-
-</script>
-
-
-
 </body>
 </html>
