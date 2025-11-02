@@ -1,364 +1,227 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>JedaBisnis Dashboard</title>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-<style>
-  *{box-sizing:border-box;font-family:'Poppins',sans-serif;}
-  body{
-    margin:0;
-    background:linear-gradient(135deg,#0a0a0f,#151522,#0b0b13);
-    color:#fff;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    min-height:100vh;
-    padding:20px;
-  }
-  .container{
-    width:100%;
-    max-width:1000px;
-    padding:25px;
-    animation:fadeIn 0.8s ease;
-  }
-  @keyframes fadeIn{from{opacity:0;transform:translateY(15px);}to{opacity:1;transform:translateY(0);}}
-  h1{text-align:center;color:#ff69b4;margin-bottom:20px;font-weight:700;letter-spacing:0.5px;}
+  <meta charset="UTF-8" />
+  <title>JedaBisnis</title>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
-  button{
-    border:none;
-    padding:12px 20px;
-    border-radius:10px;
-    cursor:pointer;
-    color:#fff;
-    font-weight:600;
-    transition:all 0.3s ease;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    gap:8px;
-  }
-  button:hover{transform:scale(1.03);}
-  .form-group{margin:10px 0;}
-  input,select{
-    width:100%;
-    padding:10px;
-    border-radius:8px;
-    border:1px solid #333;
-    background:#1a1a24;
-    color:#fff;
-  }
-  .hidden{display:none;}
-  table{width:100%;border-collapse:collapse;margin-top:20px;}
-  th,td{padding:10px;border-bottom:1px solid #333;text-align:left;}
-  .info-link{color:#ff69b4;cursor:pointer;text-decoration:underline;}
-  .popup{
-    position:fixed;
-    top:0;left:0;
-    width:100%;height:100%;
-    background:rgba(0,0,0,0.7);
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    z-index:999;
-  }
-  #popup.hidden{display:none !important;}
-  .popup-content{
-    background:#14141f;
-    border:1px solid #333;
-    border-radius:12px;
-    width:90%;max-width:500px;
-    padding:20px;
-    box-shadow:0 0 25px rgba(255,105,180,0.25);
-  }
-  .popup-content h3{color:#ff69b4;margin-top:0;}
-  .close-btn{
-    background:#333;
-    border:none;
-    padding:8px 14px;
-    border-radius:6px;
-    color:#fff;
-    cursor:pointer;
-    float:right;
-    transition:0.3s;
-  }
-  .close-btn:hover{background:#444;}
-
-  /* LOGIN FULLSCREEN CENTER */
-  #auth-section{
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    text-align:center;
-  }
-  #googleLogin{
-    background:#ff69b4;
-    box-shadow:0 0 15px rgba(255,105,180,0.4);
-    font-size:16px;
-  }
-  #googleLogin:hover{
-    background:#ff85c1;
-    box-shadow:0 0 25px rgba(255,105,180,0.6);
-  }
-  #googleLogin img{
-    width:22px;
-    height:22px;
-    background:white;
-    border-radius:50%;
-    padding:2px;
-  }
-  #loginDesc{
-    max-width:320px;
-    color:#bbb;
-    font-size:14px;
-    margin-top:10px;
-    line-height:1.4;
-  }
-
-  @media(max-width:600px){
-    table,thead,tbody,th,td,tr{display:block;}
-    th{display:none;}
-    td{padding:8px;position:relative;padding-left:50%;}
-    td:before{
-      position:absolute;
-      top:8px;left:10px;width:45%;
-      white-space:nowrap;
-      font-weight:600;
-      content:attr(data-label);
-      color:#ff69b4;
+  <style>
+    body {
+      font-family: "Inter", sans-serif;
+      background: radial-gradient(circle at top, #0e0e17, #080810);
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      flex-direction: column;
     }
-  }
-</style>
+
+    .card {
+      background: rgba(255,255,255,0.05);
+      padding: 2rem;
+      border-radius: 1rem;
+      width: 90%;
+      max-width: 500px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+      text-align: center;
+    }
+
+    h1 {
+      color: #ff85c1;
+    }
+
+    input {
+      width: 100%;
+      margin: 8px 0;
+      padding: 10px;
+      border: none;
+      border-radius: 6px;
+      background: rgba(255,255,255,0.1);
+      color: white;
+    }
+
+    button {
+      background: #ff85c1;
+      border: none;
+      color: white;
+      padding: 10px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    button:hover {
+      background: #ff6fab;
+    }
+
+    #dashboard-section {
+      display: none;
+    }
+
+    table {
+      width: 100%;
+      margin-top: 1rem;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      padding: 8px;
+      text-align: left;
+    }
+
+    img.payment-preview {
+      max-width: 80px;
+      border-radius: 8px;
+      margin-top: 8px;
+    }
+  </style>
 </head>
 <body>
-<div class="container">
-  <h1>JedaBisnis</h1>
 
   <!-- LOGIN SECTION -->
-  <div id="auth-section">
-    <button id="googleLogin">
-      <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google Logo">
-      Login dengan Google
-    </button>
-    <p id="loginDesc">
-      Silakan login untuk mendaftar bisnis baru atau mengakses dashboard Anda.
-    </p>
-  </div>
+  <section id="login-section" class="card">
+    <h1>JedaBisnis</h1>
+    <button id="loginBtn">🔑 Login dengan Google</button>
+    <p style="margin-top:10px;">Silakan login untuk mengakses dashboard Anda.</p>
+  </section>
 
-  <!-- REGISTER SECTION -->
-  <div id="register-section" class="hidden">
-    <h2>Daftar Bisnis Baru</h2>
-    <div class="form-group"><label>Nama Bisnis</label><input type="text" id="namaBisnis"></div>
-    <div class="form-group"><label>Jenis Bisnis</label><input type="text" id="jenisBisnis"></div>
-    <div class="form-group"><label>Nomor Telepon</label><input type="text" id="telepon"></div>
+  <!-- DASHBOARD SECTION -->
+  <section id="dashboard-section" class="card">
+    <h1>Dashboard Admin</h1>
+    <button id="logoutBtn" style="float:right;">Logout</button>
 
-    <!-- ✅ Tambahan: Metode pembayaran dan upload bukti -->
-    <p><b>Metode Pembayaran:</b><br>Dana - <b>Mochamad Rifaldo Efendi</b> (085171117627)</p>
-    <div class="form-group">
-      <label>Unggah Bukti Pembayaran (jpg/png):</label>
-      <input type="file" id="buktiInput" accept="image/*">
-    </div>
+    <h3>Tambah Bisnis Baru</h3>
+    <input id="namaBisnis" placeholder="Nama Bisnis" />
+    <input id="jenisBisnis" placeholder="Jenis Bisnis" />
+    <input id="nomorTelepon" placeholder="Nomor Telepon" />
 
-    <p><s>Rp100.000</s> <b>Rp99.000</b></p>
-    <button id="daftarBtn" style="background:#ff69b4;">Daftar Sekarang</button>
-    <p id="regInfo"></p>
-    <div id="progressSection"></div>
-  </div>
+    <p>💳 Pembayaran via <b>DANA: Mochamad Rifaldo Efendi - 085171117627</b></p>
+    <input type="file" id="buktiPembayaran" accept="image/*" />
+    <button id="daftarBtn">Daftar Sekarang</button>
 
-  <!-- ADMIN SECTION -->
-  <div id="admin-section" class="hidden">
-    <h2>Dashboard Admin</h2>
+    <h3 style="margin-top:20px;">Daftar Bisnis</h3>
     <table>
       <thead>
         <tr>
-          <th>Nama Bisnis</th>
-          <th>Pemilik</th>
+          <th>Nama</th>
+          <th>Jenis</th>
+          <th>Telepon</th>
           <th>Status</th>
-          <th>Tindakan</th>
+          <th>Bukti</th>
         </tr>
       </thead>
-      <tbody id="ordersList"></tbody>
+      <tbody id="businessList"></tbody>
     </table>
-  </div>
-</div>
+  </section>
 
-<!-- POPUP -->
-<div id="popup" class="popup hidden">
-  <div class="popup-content">
-    <button class="close-btn" onclick="closePopup()">Tutup</button>
-    <h3>Informasi Dashboard</h3>
-    <p id="popupText"></p>
-  </div>
-</div>
+  <script>
+    // === KONFIGURASI FIREBASE ===
+    const firebaseConfig = {
+      apiKey: "ISI_API_KEY_KAMU",
+      authDomain: "ISI_AUTH_DOMAIN",
+      databaseURL: "ISI_DATABASE_URL",
+      projectId: "ISI_PROJECT_ID",
+      storageBucket: "ISI_STORAGE_BUCKET",
+      messagingSenderId: "ISI_MSG_SENDER_ID",
+      appId: "ISI_APP_ID"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    const auth = firebase.auth();
 
-<script>
-const firebaseConfig = {
-  apiKey: "AIzaSyD_4hkC5918dHoQEOqyZ7FHR02eHx25rzM",
-  authDomain: "register-7883a.firebaseapp.com",
-  projectId: "register-7883a",
-  storageBucket: "register-7883a.appspot.com",
-  messagingSenderId: "900344098901",
-  appId: "1:900344098901:web:b95b608dacbac8285964dc"
-};
-firebase.initializeApp(firebaseConfig);
-const auth=firebase.auth();
-const db=firebase.database();
+    const loginSection = document.getElementById('login-section');
+    const dashboardSection = document.getElementById('dashboard-section');
+    const loginBtn = document.getElementById('loginBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const daftarBtn = document.getElementById('daftarBtn');
+    const businessList = document.getElementById('businessList');
 
-const adminEmails=["shysondiamond@gmail.com"];
-const authSection=document.getElementById("auth-section");
-const registerSection=document.getElementById("register-section");
-const adminSection=document.getElementById("admin-section");
-const daftarBtn=document.getElementById("daftarBtn");
-const ordersList=document.getElementById("ordersList");
-const progressSection=document.getElementById("progressSection");
-const popup=document.getElementById("popup");
-const popupText=document.getElementById("popupText");
+    // === LOGIN GOOGLE ===
+    loginBtn.onclick = () => {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      auth.signInWithPopup(provider);
+    };
 
-// pastikan popup tertutup di awal
-window.addEventListener('load',()=>popup.classList.add('hidden'));
+    // === LOGOUT ===
+    logoutBtn.onclick = () => {
+      auth.signOut();
+    };
 
-document.getElementById("googleLogin").onclick=async()=>{
-  const provider=new firebase.auth.GoogleAuthProvider();
-  try{
-    const result=await auth.signInWithPopup(provider);
-    const user=result.user;
-    checkRole(user);
-  }catch(e){console.error(e);}
-};
-
-function checkRole(user) {
-  authSection.classList.add("hidden");
-  document.querySelector(".container").style.maxWidth = "1000px";
-
-  if (adminEmails.includes(user.email)) {
-    adminSection.classList.remove("hidden");
-    loadOrders();
-  } else {
-    registerSection.classList.remove("hidden");
-    loadUserOrder(user.email);
-  }
-}
-
-// ✅ Tambahan: Simpan bukti base64 ke Realtime Database
-daftarBtn.onclick=()=>{
-  const nama=document.getElementById("namaBisnis").value;
-  const jenis=document.getElementById("jenisBisnis").value;
-  const telp=document.getElementById("telepon").value;
-  const bukti=document.getElementById("buktiInput").files[0];
-  const user=auth.currentUser;
-
-  if(!nama||!jenis||!telp||!bukti){
-    alert("Lengkapi semua data dan unggah bukti pembayaran!");
-    return;
-  }
-
-  const reader=new FileReader();
-  reader.onload=function(e){
-    const base64=e.target.result;
-    const newRef=db.ref("orders").push();
-    newRef.set({
-      userEmail:user.email,
-      namaBisnis:nama,
-      jenisBisnis:jenis,
-      telepon:telp,
-      buktiPembayaran:base64, // 🧾 Simpan base64 di Realtime DB
-      status:"Menunggu Konfirmasi Admin",
-      dashboardLink:"",
-      infoDashboard:""
+    // === PANTAU STATUS LOGIN ===
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        loginSection.style.display = 'none';
+        dashboardSection.style.display = 'block';
+        logoutBtn.style.display = 'inline-block';
+        loadBisnis();
+      } else {
+        loginSection.style.display = 'block';
+        dashboardSection.style.display = 'none';
+        logoutBtn.style.display = 'none';
+      }
     });
-    document.getElementById("regInfo").innerText="Pendaftaran berhasil! Menunggu konfirmasi admin.";
-  };
-  reader.readAsDataURL(bukti);
-};
 
-function loadUserOrder(email){
-  db.ref("orders").orderByChild("userEmail").equalTo(email).on("value",snap=>{
-    progressSection.innerHTML="";
-    snap.forEach(child=>{
-      const d=child.val();
-      const div=document.createElement("div");
-      div.innerHTML=`<p><b>${d.namaBisnis}</b></p>
-      <p>Status: ${d.status}</p>
-      ${d.buktiPembayaran?`<img src="${d.buktiPembayaran}" style="width:100px;border-radius:8px;">`:''}
-      ${d.status==="Dashboard Berhasil Dibuat"?`<p><a class="info-link" onclick="showInfo('${child.key}')">Lihat Informasi</a></p>`:""}`;
-      progressSection.appendChild(div);
-    });
-  });
-}
+    // === TAMBAH BISNIS BARU ===
+    daftarBtn.onclick = async () => {
+      const nama = document.getElementById('namaBisnis').value;
+      const jenis = document.getElementById('jenisBisnis').value;
+      const telp = document.getElementById('nomorTelepon').value;
+      const fileInput = document.getElementById('buktiPembayaran');
 
-function loadOrders(){
-  db.ref("orders").on("value",snap=>{
-    ordersList.innerHTML="";
-    snap.forEach(child=>{
-      const data=child.val();
-      const tr=document.createElement("tr");
-      tr.innerHTML=`<td data-label="Nama Bisnis">${data.namaBisnis}</td>
-      <td data-label="Pemilik">${data.userEmail}</td>
-      <td data-label="Status">${data.status}</td>
-      <td data-label="Tindakan">
-        ${data.status!=="Dashboard Berhasil Dibuat"?`<button onclick="nextStage('${child.key}')">Lanjut</button>`:""}
-        ${data.status==="Menunggu Pembayaran"?`<button onclick="cancelOrder('${child.key}')">Batalkan</button>`:""}
-        ${data.buktiPembayaran?`<a href="${data.buktiPembayaran}" target="_blank" style="color:#ff69b4;">Lihat Bukti</a>`:""}
-      </td>`;
-      ordersList.appendChild(tr);
-    });
-  });
-}
+      if (!nama || !jenis || !telp) {
+        alert("Harap isi semua data bisnis!");
+        return;
+      }
 
-const stages=[
-  "Menunggu Pembayaran",
-  "Menunggu Konfirmasi Admin",
-  "Admin Telah Mengkonfirmasi",
-  "Proses Pembuatan Dashboard",
-  "Dashboard Berhasil Dibuat"
-];
+      let buktiBase64 = "";
+      if (fileInput.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          buktiBase64 = e.target.result;
 
-window.nextStage=id=>{
-  const ref=db.ref("orders/"+id);
-  ref.once("value",snap=>{
-    const data=snap.val();
-    let nextIndex=stages.indexOf(data.status)+1;
-    if(nextIndex>=stages.length)return;
-    const newStatus=stages[nextIndex];
-    const updates={status:newStatus};
-    if(newStatus==="Dashboard Berhasil Dibuat"){
-      const link=prompt("Masukkan link dashboard:");
-      const info=prompt("Tulis informasi tambahan untuk user:");
-      if(link)updates.dashboardLink=link;
-      if(info)updates.infoDashboard=info;
+          const newRef = db.ref('bisnis').push();
+          newRef.set({
+            nama,
+            jenis,
+            telp,
+            bukti: buktiBase64,
+            status: "Menunggu Konfirmasi",
+            pemilik: auth.currentUser.email
+          });
+          alert("Bisnis berhasil didaftarkan!");
+          fileInput.value = '';
+          document.getElementById('namaBisnis').value = '';
+          document.getElementById('jenisBisnis').value = '';
+          document.getElementById('nomorTelepon').value = '';
+        };
+        reader.readAsDataURL(fileInput.files[0]);
+      } else {
+        alert("Harap unggah bukti pembayaran.");
+      }
+    };
+
+    // === MUAT DATA BISNIS ===
+    function loadBisnis() {
+      db.ref('bisnis').on('value', (snap) => {
+        businessList.innerHTML = '';
+        snap.forEach((child) => {
+          const b = child.val();
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${b.nama}</td>
+            <td>${b.jenis}</td>
+            <td>${b.telp}</td>
+            <td>${b.status}</td>
+            <td>${b.bukti ? `<img class="payment-preview" src="${b.bukti}" />` : '-'}</td>
+          `;
+          businessList.appendChild(row);
+        });
+      });
     }
-    ref.update(updates);
-  });
-};
-
-window.cancelOrder=id=>{
-  if(confirm("Batalkan pesanan ini?")) db.ref("orders/"+id).remove();
-};
-
-window.showInfo=id=>{
-  db.ref("orders/"+id).once("value",snap=>{
-    const d=snap.val();
-    popupText.innerHTML=`<p><b>Link Dashboard:</b> <a href="${d.dashboardLink}" target="_blank">${d.dashboardLink}</a></p><p>${d.infoDashboard}</p>`;
-    popup.classList.remove("hidden");
-  });
-};
-
-window.closePopup=()=>popup.classList.add("hidden");
-
-auth.onAuthStateChanged(user => {
-  if (user) {
-    authSection.classList.add("hidden");
-    checkRole(user);
-  } else {
-    authSection.classList.remove("hidden");
-    registerSection.classList.add("hidden");
-    adminSection.classList.add("hidden");
-  }
-});
-</script>
+  </script>
 </body>
 </html>
