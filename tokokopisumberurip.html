@@ -9,8 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-  <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#1c1c1c">
+
 
 
   <style>
@@ -1587,41 +1586,9 @@ function snapToAOA(snap, cols) {
   }
 </script>
 
-  <button id="installBtn" style="padding:10px 16px;border:none;background:#4CAF50;color:white;border-radius:8px;cursor:pointer;">
-  📲 Install Aplikasi
-</button>
+ 
 
-<script>
-  let deferredPrompt;
-  const installBtn = document.getElementById("installBtn");
-  installBtn.style.display = "none";
 
-  window.addEventListener("beforeinstallprompt", e => {
-    e.preventDefault();
-    deferredPrompt = e;
-    installBtn.style.display = "block";
-  });
-
-  installBtn.addEventListener("click", async () => {
-    if (deferredPrompt) {
-      deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
-      if (outcome === "accepted") {
-        console.log("User accepted install");
-      } else {
-        console.log("User dismissed install");
-      }
-      deferredPrompt = null;
-      installBtn.style.display = "none";
-    }
-  });
-
-  // Sembunyikan tombol kalau sudah terinstal
-  window.addEventListener("appinstalled", () => {
-    console.log("PWA installed!");
-    installBtn.style.display = "none";
-  });
-</script>
 
 
 </body>
