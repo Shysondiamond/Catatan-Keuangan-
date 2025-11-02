@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Keuangan & Kasir — Toko Kopi Sumber Urip</title>
-
+ <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <!-- Font + Chart.js -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -975,30 +975,112 @@
       showToast('Filter diterapkan');
     });
 
-    $('btnExportCsv').addEventListener('click', async () => {
-      try{
-        const [utama, opr, tab, hpp, tx, prd, bahan] = await Promise.all([
-          db.ref('keuangan_utama').once('value'),
-          db.ref('keuangan_opr').once('value'),
-          db.ref('keuangan_tabungan').once('value'),
-          db.ref('keuangan_hpp').once('value'),
-          db.ref('transaksi').once('value'),
-          db.ref('produk').once('value'),
-          db.ref('bahan_stok').once('value')
-        ]);
-        let csv = 'Tabel,ID,Tanggal,Deskripsi,Jenis,Jumlah,User\n';
-        utama.forEach(s => { const d = s.val(); csv += `keuangan_utama,${d.id},${d.date},${escapeCsv(d.desc)},${escapeCsv(d.type)},${d.amount},${escapeCsv(d.user)}\n`; });
-        opr.forEach(s => { const d = s.val(); csv += `keuangan_opr,${d.id},${d.date},${escapeCsv(d.desc)},operasional,${d.amount},${escapeCsv(d.user)}\n`; });
-        tab.forEach(s => { const d = s.val(); csv += `keuangan_tabungan,${d.id},${d.date},${escapeCsv(d.desc)},tabungan,${d.amount},${escapeCsv(d.user)}\n`; });
-        hpp.forEach(s => { const d = s.val(); csv += `keuangan_hpp,${d.id},${d.date},${escapeCsv(d.desc)},hpp,${d.amount},${escapeCsv(d.user)}\n`; });
-        tx.forEach(s => { const d = s.val(); csv += `transaksi,${d.id},${d.date},${escapeCsv(d.desc)},${escapeCsv(d.kind||d.source)},${d.amount},${escapeCsv(d.user)}\n`; });
-        prd.forEach(s => { const d = s.val(); csv += `produk,${d.id},,${escapeCsv(d.name)},modal:${d.cost},jual:${d.price}\n`; });
-        bahan.forEach(s => { const d = s.val(); csv += `bahan_stok,${s.key || ''},,${escapeCsv(d.nama)},stok:${d.stok},satuan:${d.satuan}\n`; });
-        const blob = new Blob([csv], { type: 'text/csv' }); const url = URL.createObjectURL(blob);
-        const a = document.createElement('a'); a.href = url; a.download = 'data_keuangan.csv'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
-        showToast('Export selesai');
-      } catch(err){ console.error(err); showToast('Export gagal'); }
+    async function ensureXLSX() {
+  if (window.XLSX) return;
+  return new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    // reliable CDN (SheetJS distribution)
+    s.src = 'https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js';
+    s.onload = () => { resolve(); };
+    s.onerror = () => { reject(new Error('Gagal memuat xlsx library')); };
+    document.head.appendChild(s);
+  });
+}
+
+// Helper: konversi Firebase snapshot ke array of arrays (AOA)
+function snapToAOA(snap, cols) {
+  const rows = [];
+  snap.forEach(s => {
+    const d = s.val();
+    const row = cols.map(c => {
+      // jika c adalah fungsi, panggil untuk dapatkan nilai dari (val, key)
+      if (typeof c === 'function') return c(d, s.key);
+      return (d && (d[c] !== undefined && d[c] !== null)) ? d[c] : '';
     });
+    rows.push(row);
+  });
+  return rows;
+}
+
+// Replace / attach export handler (safe - will remove previous if exists)
+(function attachExcelExport(){
+  const btn = document.getElementById('btnExportCsv');
+  if(!btn) return;
+  // Remove previous listeners (best-effort)
+  btn.replaceWith(btn.cloneNode(true));
+  const newBtn = document.getElementById('btnExportCsv');
+
+  newBtn.addEventListener('click', async () => {
+    try {
+      showToast('Mempersiapkan export...');
+      await ensureXLSX(); // pastikan XLSX ter-load
+
+      // ambil semua snapshot (sekali)
+      const [utamaSnap, oprSnap, tabSnap, hppSnap, txSnap, prdSnap, bahanSnap] = await Promise.all([
+        db.ref('keuangan_utama').once('value'),
+        db.ref('keuangan_opr').once('value'),
+        db.ref('keuangan_tabungan').once('value'),
+        db.ref('keuangan_hpp').once('value'),
+        db.ref('transaksi').once('value'),
+        db.ref('produk').once('value'),
+        db.ref('bahan_stok').once('value')
+      ]);
+
+      // create AOA (array of arrays) per sheet, pertama baris header
+      const sheetUtama = [
+        ['ID','Tanggal','Deskripsi','Jenis','Jumlah','User'],
+        ...snapToAOA(utamaSnap, ['id','date','desc','type','amount','user'])
+      ];
+      const sheetOpr = [
+        ['ID','Tanggal','Deskripsi','Jenis','Jumlah','User'],
+        ...snapToAOA(oprSnap, [ 'id','date','desc', d => 'operasional', 'amount','user' ])
+      ];
+      const sheetTab = [
+        ['ID','Tanggal','Deskripsi','Jenis','Jumlah','User'],
+        ...snapToAOA(tabSnap, [ 'id','date','desc', d => 'tabungan', 'amount','user' ])
+      ];
+      const sheetHpp = [
+        ['ID','Tanggal','Deskripsi','Jenis','Jumlah','User'],
+        ...snapToAOA(hppSnap, [ 'id','date','desc', d => 'hpp', 'amount','user' ])
+      ];
+      const sheetTx = [
+        ['ID','Tanggal','Deskripsi','Sumber/Jenis','Jumlah','User'],
+        ...snapToAOA(txSnap, [ 'id','date','desc', d => (d.kind || d.source || ''), 'amount','user' ])
+      ];
+      const sheetPrd = [
+        ['ID','Nama','Modal','Harga Jual'],
+        ...snapToAOA(prdSnap, [ (d,k) => d.id || k || '', 'name','cost','price' ])
+      ];
+      const sheetBhn = [
+        ['Key','Nama','Stok','Satuan','Updated'],
+        ...snapToAOA(bahanSnap, [ (d,k) => k || '', 'nama','stok','satuan','updated' ])
+      ];
+
+      // buat workbook dan append sheets
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(sheetUtama), 'Keuangan Utama');
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(sheetOpr), 'Operasional');
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(sheetTab), 'Tabungan');
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(sheetHpp), 'HPP');
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(sheetTx), 'Transaksi');
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(sheetPrd), 'Produk');
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(sheetBhn), 'Bahan Stok');
+
+      // nama file dengan timestamp supaya tidak tertimpa
+      const now = new Date();
+      const pad = n => String(n).padStart(2,'0');
+      const filename = `data_keuangan_${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}.xlsx`;
+
+      // tulis file (download)
+      XLSX.writeFile(wb, filename);
+
+      showToast('Export Excel selesai');
+    } catch (err) {
+      console.error('Export Excel error:', err);
+      showToast('Export Excel gagal (cek console)');
+    }
+  });
+})();
 
     // CART handlers (implemented below)
   } // end attachListeners
