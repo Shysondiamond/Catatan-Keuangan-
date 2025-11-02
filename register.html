@@ -155,6 +155,14 @@
     <div class="form-group"><label>Nama Bisnis</label><input type="text" id="namaBisnis"></div>
     <div class="form-group"><label>Jenis Bisnis</label><input type="text" id="jenisBisnis"></div>
     <div class="form-group"><label>Nomor Telepon</label><input type="text" id="telepon"></div>
+
+    <!-- ✅ Tambahan: Metode pembayaran dan upload bukti -->
+    <p><b>Metode Pembayaran:</b><br>Dana - <b>Mochamad Rifaldo Efendi</b> (085171117627)</p>
+    <div class="form-group">
+      <label>Unggah Bukti Pembayaran (jpg/png):</label>
+      <input type="file" id="buktiInput" accept="image/*">
+    </div>
+
     <p><s>Rp100.000</s> <b>Rp99.000</b></p>
     <button id="daftarBtn" style="background:#ff69b4;">Daftar Sekarang</button>
     <p id="regInfo"></p>
@@ -223,7 +231,6 @@ document.getElementById("googleLogin").onclick=async()=>{
 };
 
 function checkRole(user) {
-  // Pastikan login hilang dulu
   authSection.classList.add("hidden");
   document.querySelector(".container").style.maxWidth = "1000px";
 
@@ -236,24 +243,36 @@ function checkRole(user) {
   }
 }
 
-
+// ✅ Tambahan: Simpan bukti base64 ke Realtime Database
 daftarBtn.onclick=()=>{
   const nama=document.getElementById("namaBisnis").value;
   const jenis=document.getElementById("jenisBisnis").value;
   const telp=document.getElementById("telepon").value;
+  const bukti=document.getElementById("buktiInput").files[0];
   const user=auth.currentUser;
-  if(!nama||!jenis||!telp){alert("Lengkapi semua data!");return;}
-  const newRef=db.ref("orders").push();
-  newRef.set({
-    userEmail:user.email,
-    namaBisnis:nama,
-    jenisBisnis:jenis,
-    telepon:telp,
-    status:"Menunggu Pembayaran",
-    dashboardLink:"",
-    infoDashboard:""
-  });
-  document.getElementById("regInfo").innerText="Pendaftaran berhasil! Menunggu pembayaran...";
+
+  if(!nama||!jenis||!telp||!bukti){
+    alert("Lengkapi semua data dan unggah bukti pembayaran!");
+    return;
+  }
+
+  const reader=new FileReader();
+  reader.onload=function(e){
+    const base64=e.target.result;
+    const newRef=db.ref("orders").push();
+    newRef.set({
+      userEmail:user.email,
+      namaBisnis:nama,
+      jenisBisnis:jenis,
+      telepon:telp,
+      buktiPembayaran:base64, // 🧾 Simpan base64 di Realtime DB
+      status:"Menunggu Konfirmasi Admin",
+      dashboardLink:"",
+      infoDashboard:""
+    });
+    document.getElementById("regInfo").innerText="Pendaftaran berhasil! Menunggu konfirmasi admin.";
+  };
+  reader.readAsDataURL(bukti);
 };
 
 function loadUserOrder(email){
@@ -264,6 +283,7 @@ function loadUserOrder(email){
       const div=document.createElement("div");
       div.innerHTML=`<p><b>${d.namaBisnis}</b></p>
       <p>Status: ${d.status}</p>
+      ${d.buktiPembayaran?`<img src="${d.buktiPembayaran}" style="width:100px;border-radius:8px;">`:''}
       ${d.status==="Dashboard Berhasil Dibuat"?`<p><a class="info-link" onclick="showInfo('${child.key}')">Lihat Informasi</a></p>`:""}`;
       progressSection.appendChild(div);
     });
@@ -282,6 +302,7 @@ function loadOrders(){
       <td data-label="Tindakan">
         ${data.status!=="Dashboard Berhasil Dibuat"?`<button onclick="nextStage('${child.key}')">Lanjut</button>`:""}
         ${data.status==="Menunggu Pembayaran"?`<button onclick="cancelOrder('${child.key}')">Batalkan</button>`:""}
+        ${data.buktiPembayaran?`<a href="${data.buktiPembayaran}" target="_blank" style="color:#ff69b4;">Lihat Bukti</a>`:""}
       </td>`;
       ordersList.appendChild(tr);
     });
@@ -327,19 +348,17 @@ window.showInfo=id=>{
 };
 
 window.closePopup=()=>popup.classList.add("hidden");
+
 auth.onAuthStateChanged(user => {
   if (user) {
-    // Sembunyikan login dan tampilkan bagian sesuai role
     authSection.classList.add("hidden");
     checkRole(user);
   } else {
-    // Jika belum login, tampilkan halaman login saja
     authSection.classList.remove("hidden");
     registerSection.classList.add("hidden");
     adminSection.classList.add("hidden");
   }
 });
-
 </script>
 </body>
 </html>
