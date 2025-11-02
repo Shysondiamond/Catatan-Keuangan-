@@ -10,7 +10,7 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#ffffff">
+<meta name="theme-color" content="#1c1c1c">
 
 
   <style>
@@ -1474,16 +1474,37 @@
 </script>
 
 
-  <script>
+<script>
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
       navigator.serviceWorker
         .register("/Catatan-Keuangan-/sw.js")
-        .then(() => console.log("Service Worker registered!"))
-        .catch(err => console.log("SW registration failed: ", err));
+        .then(reg => {
+          console.log("✅ Service Worker ready:", reg.scope);
+
+          // Notifikasi saat offline
+          window.addEventListener("offline", () => {
+            if (navigator.serviceWorker.controller) {
+              navigator.serviceWorker.controller.postMessage("offline-notice");
+            }
+          });
+
+          // Auto update kalau ada SW baru
+          reg.onupdatefound = () => {
+            const newWorker = reg.installing;
+            newWorker.onstatechange = () => {
+              if (newWorker.state === "installed" && navigator.serviceWorker.controller) {
+                console.log("🔄 Versi baru tersedia, memuat ulang...");
+                window.location.reload();
+              }
+            };
+          };
+        })
+        .catch(err => console.log("❌ SW gagal:", err));
     });
   }
 </script>
+
 
 </body>
 </html>
