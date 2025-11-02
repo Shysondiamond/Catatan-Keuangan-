@@ -236,6 +236,7 @@
         <button id="nav_kasir" aria-controls="view_kasir">🛒 Kasir</button>
         <button id="nav_products" aria-controls="view_products">🧾 Produk</button>
         <button id="nav_keuangan" aria-controls="view_keuangan">💼 Keuangan</button>
+        <button id="nav_users" aria-controls="view_users" class="admin-only" style="display:none;">👤 User</button>
         <!-- nav_bahan akan disisipkan otomatis jika belum ada -->
       </div>
 
@@ -489,6 +490,29 @@
           </div>
         </div>
       </section>
+
+      <!-- ========== VIEW USER (KHUSUS ADMIN) ========== -->
+<section id="view_users" class="card hidden">
+  <h4 style="color:var(--pink);margin:0 0 8px 0">Manajemen User</h4>
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+    <div>
+      <div class="small-quiet">Daftar user sistem (hanya admin).</div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <input id="searchUser" class="input-plain" placeholder="Cari user (email)" style="width:180px">
+      <button id="btnAddUser" class="btn">+ Tambah User</button>
+    </div>
+  </div>
+  <div style="margin-top:12px;max-height:420px;overflow:auto" class="table-wrap">
+    <table id="table_users">
+      <thead>
+        <tr><th>Email</th><th>Password</th><th>Aksi</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</section>
+
 
       <!-- Stok Bahan (akan diinsert otomatis oleh script) -->
 
@@ -1567,6 +1591,82 @@ function snapToAOA(snap, cols) {
 
     // Kode JavaScript Anda yang lain (Chart.js, Firebase, dll.) dapat ditempatkan di sini
   });
+
+
+  /* ========== FITUR: MANAJEMEN USER (ADMIN SAJA) ========== */
+const navUsers = document.getElementById('nav_users');
+const viewUsers = document.getElementById('view_users');
+const tbodyUsers = document.querySelector('#table_users tbody');
+const btnAddUser = document.getElementById('btnAddUser');
+const searchUser = document.getElementById('searchUser');
+
+// Render tabel user
+function renderUsers(filter = '') {
+  db.ref('users').once('value', snap => {
+    tbodyUsers.innerHTML = '';
+    snap.forEach(child => {
+      const u = child.val();
+      if (filter && !u.email.toLowerCase().includes(filter.toLowerCase())) return;
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${escapeHtml(u.email)}</td>
+        <td>${escapeHtml(u.password || '-')}</td>
+        <td>
+          <button class="btn small" onclick="editUser('${child.key}','${u.email}','${u.password || ''}')">Edit</button>
+          <button class="btn small" style="background:#1a2330;color:#e7eef8" onclick="deleteUser('${child.key}','${u.email}')">Hapus</button>
+        </td>`;
+      tbodyUsers.appendChild(tr);
+    });
+  });
+}
+
+// Tambah user
+btnAddUser.addEventListener('click', () => {
+  const email = prompt('Masukkan email user baru:');
+  if (!email) return;
+  const password = prompt('Masukkan password:');
+  if (!password) return;
+  const ref = db.ref('users').push();
+  ref.set({ email, password }).then(() => {
+    showToast('User ditambahkan');
+    renderUsers(searchUser.value);
+  });
+});
+
+// Edit user
+function editUser(key, oldEmail, oldPass) {
+  const email = prompt('Edit email:', oldEmail);
+  if (!email) return;
+  const password = prompt('Edit password:', oldPass);
+  if (password == null) return;
+  db.ref('users/' + key).update({ email, password }).then(() => {
+    showToast('User diperbarui');
+    renderUsers(searchUser.value);
+  });
+}
+
+// Hapus user
+function deleteUser(key, email) {
+  if (!confirm(`Hapus user ${email}?`)) return;
+  db.ref('users/' + key).remove().then(() => {
+    showToast('User dihapus');
+    renderUsers(searchUser.value);
+  });
+}
+
+// Filter pencarian
+searchUser.addEventListener('input', e => renderUsers(e.target.value));
+
+// Hanya admin yang bisa lihat tab ini
+if (window.currentUser && window.currentUser.role === 'admin') {
+  navUsers.style.display = 'inline-block';
+  navUsers.addEventListener('click', () => {
+    showOnly('users');
+    setSidebarActive('users');
+    renderUsers();
+  });
+}
+
 </script>
 
 
