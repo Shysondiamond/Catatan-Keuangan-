@@ -411,5 +411,149 @@ ease;
     installBtn.style.display = "none";
   });
 </script>
+
+
+  <!-- 🟣 Popup Daftar Akun JedaBisnis -->
+<div id="popupDaftar" style="
+  display:none;
+  position:fixed;
+  top:0; left:0;
+  width:100%; height:100%;
+  background:rgba(0,0,0,0.6);
+  backdrop-filter:blur(8px);
+  justify-content:center;
+  align-items:center;
+  z-index:999;
+">
+  <div style="
+    background:rgba(255,255,255,0.1);
+    border-radius:20px;
+    padding:30px 25px;
+    width:90%;
+    max-width:400px;
+    text-align:left;
+    color:#fff;
+    box-shadow:0 0 25px rgba(255,255,255,0.2);
+    animation:fadeInPopup 0.4s ease;
+  ">
+    <h2 style="text-align:center;color:#ff80c0;margin-bottom:15px;">Daftar Akun JedaBisnis</h2>
+
+    <label>Nama:</label>
+    <input id="nama" type="text" class="inputForm">
+    <small id="err-nama" class="errorMsg"></small>
+
+    <label>Nama Bisnis:</label>
+    <input id="namaBisnis" type="text" class="inputForm">
+    <small id="err-namaBisnis" class="errorMsg"></small>
+
+    <label>Kategori Bisnis:</label>
+    <input id="kategoriBisnis" type="text" class="inputForm">
+    <small id="err-kategoriBisnis" class="errorMsg"></small>
+
+    <label>Alamat Bisnis:</label>
+    <input id="alamatBisnis" type="text" class="inputForm">
+    <small id="err-alamatBisnis" class="errorMsg"></small>
+
+    <label>Metode Pembayaran:</label>
+    <div style="background:rgba(255,255,255,0.15);padding:10px;border-radius:8px;margin-bottom:10px;">
+      <strong>DANA</strong> — 085171117627 A/n Mochamad Rifaldo Efendi
+    </div>
+
+    <div style="margin-bottom:15px;">
+      <span style="text-decoration:line-through;color:#ccc;">Rp100.000</span>
+      <span style="color:#ff80c0;font-weight:700;margin-left:10px;">Rp99.000</span>
+    </div>
+
+    <button onclick="kirimWhatsApp()" style="width:100%;padding:12px;border:none;border-radius:30px;background:#ff4081;color:#fff;font-weight:600;cursor:pointer;">Kirim via WhatsApp</button>
+    <button onclick="tutupPopup()" style="width:100%;padding:12px;border:none;border-radius:30px;background:rgba(255,255,255,0.15);color:#fff;font-weight:600;cursor:pointer;margin-top:10px;">Tutup</button>
+  </div>
+</div>
+
+<style>
+@keyframes fadeInPopup {
+  from {opacity:0; transform:scale(0.9);}
+  to {opacity:1; transform:scale(1);}
+}
+
+.inputForm {
+  width:100%;
+  padding:10px;
+  border:none;
+  border-radius:8px;
+  margin-bottom:6px;
+  background-color:rgba(255,255,255,0.15);
+  color:white;
+}
+
+.inputForm.error {
+  border:1px solid #ff8080;
+  background-color:rgba(255,0,0,0.15);
+}
+
+.errorMsg {
+  color:#ff9090;
+  font-size:12px;
+  margin-bottom:8px;
+  display:none;
+}
+</style>
+
+<script>
+  // Buka popup ketika tombol "Daftar Sekarang!" ditekan
+  document.querySelectorAll('.btn.btn-register[href="/Catatan-Keuangan-/register.html"]').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.preventDefault();
+      document.getElementById('popupDaftar').style.display = 'flex';
+    });
+  });
+
+  // Tutup popup
+  function tutupPopup() {
+    document.getElementById('popupDaftar').style.display = 'none';
+  }
+
+  // Kirim ke WhatsApp dengan validasi wajib isi
+  function kirimWhatsApp() {
+    const fields = [
+      { id: 'nama', label: 'Nama' },
+      { id: 'namaBisnis', label: 'Nama Bisnis' },
+      { id: 'kategoriBisnis', label: 'Kategori Bisnis' },
+      { id: 'alamatBisnis', label: 'Alamat Bisnis' },
+    ];
+
+    let valid = true;
+
+    fields.forEach(f => {
+      const input = document.getElementById(f.id);
+      const err = document.getElementById(`err-${f.id}`);
+      if (input.value.trim() === '') {
+        input.classList.add('error');
+        err.textContent = `${f.label} wajib diisi!`;
+        err.style.display = 'block';
+        valid = false;
+      } else {
+        input.classList.remove('error');
+        err.style.display = 'none';
+      }
+    });
+
+    if (!valid) return;
+
+    const nama = document.getElementById('nama').value.trim();
+    const namaBisnis = document.getElementById('namaBisnis').value.trim();
+    const kategoriBisnis = document.getElementById('kategoriBisnis').value.trim();
+    const alamatBisnis = document.getElementById('alamatBisnis').value.trim();
+
+    const pesan = `Halo, saya ingin daftar akun JedaBisnis.%0A%0A` +
+      `Nama: ${nama}%0A` +
+      `Nama Bisnis: ${namaBisnis}%0A` +
+      `Kategori Bisnis: ${kategoriBisnis}%0A` +
+      `Alamat Bisnis: ${alamatBisnis}%0A%0A` +
+      `Metode Pembayaran: DANA (085171117627)%0A` +
+      `Harga: Rp99.000 (Diskon dari Rp100.000)`;
+
+    window.open(`https://wa.me/6285171117627?text=${pesan}`, '_blank');
+  }
+</script>
 </body>
 </html>
