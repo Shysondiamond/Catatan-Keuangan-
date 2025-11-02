@@ -15,24 +15,24 @@
   "prefer_related_applications": false,
   "icons": [
     {
-      "src": "/Catatan-Keuangan-/icons/icon-192.png",
+      "src": "/192.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "/Catatan-Keuangan-/icons/icon-512.png",
+      "src": "/icon-512.png",
       "sizes": "512x512",
       "type": "image/png"
     }
   ],
   "shortcuts": [
     {
-      "name": "Tambah Catatan",
-      "short_name": "Tambah",
+      "name": "Keuangan & Kasir Surip",
+      "short_name": "Dashboard Surip",
       "url": "/Catatan-Keuangan-/tambah.html",
       "icons": [
         {
-          "src": "/Catatan-Keuangan-/icons/add.png",
+          "src": "/96x96.png",
           "sizes": "96x96",
           "type": "image/png"
         }
