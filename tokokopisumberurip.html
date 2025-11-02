@@ -1581,10 +1581,21 @@ function snapToAOA(snap, cols) {
           }
         });
       });
+    
     }
 
     // Kode JavaScript Anda yang lain (Chart.js, Firebase, dll.) dapat ditempatkan di sini
 
+// Pastikan tab admin ikut sistem navigasi
+const navAdmin = document.getElementById('nav_admin');
+if (navAdmin) {
+  navAdmin.addEventListener('click', () => {
+    document.querySelectorAll('.tab-content section').forEach(sec => sec.classList.add('hidden'));
+    document.getElementById('view_admin').classList.remove('hidden');
+    document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
+    navAdmin.classList.add('active');
+  });
+}
 
     
   });
