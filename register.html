@@ -4,74 +4,160 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>JedaBisnis Dashboard</title>
+
+<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
 <style>
-  *{box-sizing:border-box;font-family:'Poppins',sans-serif;}
-  body{
-    margin:0;background:#0a0a0f;color:#fff;
-    display:flex;justify-content:center;align-items:center;
-    min-height:100vh;
+  * { box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+  body {
+    margin: 0;
+    background: #0a0a0f;
+    color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    padding: 20px;
   }
-  .container{
-    width:95%;max-width:950px;
-    background:rgba(30,30,40,0.95);
-    border-radius:16px;
-    padding:25px;
-    box-shadow:0 0 30px rgba(255,20,147,0.25);
+  .container {
+    width: 100%;
+    max-width: 1000px;
+    background: rgba(30, 30, 40, 0.95);
+    border-radius: 16px;
+    padding: 25px;
+    box-shadow: 0 0 30px rgba(255, 20, 147, 0.25);
   }
-  h1{text-align:center;color:#ff69b4;margin-bottom:20px;}
-  button{
-    background:#ff69b4;border:none;padding:10px 18px;border-radius:8px;
-    cursor:pointer;color:#fff;font-weight:600;transition:0.3s;
+  h1 {
+    text-align: center;
+    color: #ff69b4;
+    margin-bottom: 20px;
   }
-  button:hover{background:#ff85c1;}
-  .form-group{margin:10px 0;}
-  input,select{
-    width:100%;padding:10px;border-radius:8px;border:1px solid #333;
-    background:#1a1a24;color:#fff;
+  button {
+    background: #ff69b4;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    color: #fff;
+    font-weight: 600;
+    transition: background 0.3s;
   }
-  .hidden{display:none;}
-  table{width:100%;border-collapse:collapse;margin-top:20px;}
-  th,td{padding:10px;border-bottom:1px solid #333;text-align:left;}
-  .status{font-weight:600;}
-  .info-link{color:#ff69b4;cursor:pointer;text-decoration:underline;}
-  .popup{
-    position:fixed;top:0;left:0;width:100%;height:100%;
-    background:rgba(0,0,0,0.7);display:flex;justify-content:center;align-items:center;
-    z-index:999;
+  button:hover { background: #ff85c1; }
+  .form-group { margin: 10px 0; }
+  input, select {
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #333;
+    background: #1a1a24;
+    color: #fff;
   }
-  .popup-content{
-    background:#1a1a24;padding:20px;border-radius:12px;
-    width:90%;max-width:500px;box-shadow:0 0 25px rgba(255,105,180,0.4);
+  .hidden { display: none !important; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    overflow-x: auto;
   }
-  .popup-content h3{color:#ff69b4;}
-  .close-btn{
-    background:#333;border:none;padding:8px 14px;border-radius:6px;
-    color:#fff;cursor:pointer;float:right;
+  th, td {
+    padding: 10px;
+    border-bottom: 1px solid #333;
+    text-align: left;
+  }
+  th { color: #ff85c1; }
+  .status { font-weight: 600; }
+  .info-link {
+    color: #ff69b4;
+    cursor: pointer;
+    text-decoration: underline;
+  }
+  .popup {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.7);
+    display: flex; justify-content: center; align-items: center;
+    z-index: 999;
+  }
+  .popup-content {
+    background: #1a1a24;
+    padding: 20px;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 0 25px rgba(255,105,180,0.4);
+    animation: fadeIn 0.3s ease;
+  }
+  .popup-content h3 {
+    color: #ff69b4; margin-top: 0;
+  }
+  .close-btn {
+    background: #333;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 6px;
+    color: #fff;
+    cursor: pointer;
+    float: right;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  @media(max-width:600px) {
+    table, thead, tbody, th, td, tr { display: block; }
+    th { display: none; }
+    td {
+      padding: 8px;
+      position: relative;
+      padding-left: 50%;
+      border-bottom: 1px solid #222;
+    }
+    td::before {
+      position: absolute;
+      top: 8px; left: 10px;
+      width: 45%;
+      white-space: nowrap;
+      font-weight: 600;
+      content: attr(data-label);
+      color: #ff69b4;
+    }
   }
 </style>
 </head>
 <body>
+
 <div class="container">
   <h1>JedaBisnis</h1>
 
+  <!-- Login Section -->
   <div id="auth-section">
     <button id="googleLogin">Login dengan Google</button>
   </div>
 
+  <!-- Register Section -->
   <div id="register-section" class="hidden">
     <h2>Daftar Bisnis Baru</h2>
-    <div class="form-group"><label>Nama Bisnis</label><input type="text" id="namaBisnis"></div>
-    <div class="form-group"><label>Jenis Bisnis</label><input type="text" id="jenisBisnis"></div>
-    <div class="form-group"><label>Nomor Telepon</label><input type="text" id="telepon"></div>
+    <div class="form-group">
+      <label>Nama Bisnis</label>
+      <input type="text" id="namaBisnis" placeholder="Contoh: Jeda Coffee">
+    </div>
+    <div class="form-group">
+      <label>Jenis Bisnis</label>
+      <input type="text" id="jenisBisnis" placeholder="Contoh: Kedai Kopi">
+    </div>
+    <div class="form-group">
+      <label>Nomor Telepon</label>
+      <input type="text" id="telepon" placeholder="08xxxxxxxxxx">
+    </div>
     <p><s>Rp100.000</s> <b>Rp99.000</b></p>
     <button id="daftarBtn">Daftar Sekarang</button>
     <p id="regInfo"></p>
     <div id="progressSection"></div>
   </div>
 
+  <!-- Admin Section -->
   <div id="admin-section" class="hidden">
     <h2>Dashboard Admin</h2>
     <table>
@@ -88,117 +174,127 @@
   </div>
 </div>
 
-<!-- Popup Informasi -->
+<!-- Popup -->
 <div id="popup" class="popup hidden">
   <div class="popup-content">
     <button class="close-btn" onclick="closePopup()">Tutup</button>
     <h3>Informasi Dashboard</h3>
-    <p id="popupText"></p>
+    <div id="popupText"></div>
   </div>
 </div>
 
 <script>
-  // 🔥 Firebase config (ganti dengan punyamu)
+  // ==== Firebase Config ====
   const firebaseConfig = {
-  apiKey: "AIzaSyD_4hkC5918dHoQEOqyZ7FHR02eHx25rzM",
-  authDomain: "register-7883a.firebaseapp.com",
-  projectId: "register-7883a",
-  storageBucket: "register-7883a.firebasestorage.app",
-  messagingSenderId: "900344098901",
-  appId: "1:900344098901:web:b95b608dacbac8285964dc",
-  measurementId: "G-L3CGV1P69Y"
-};
+    apiKey: "AIzaSyD_4hkC5918dHoQEOqyZ7FHR02eHx25rzM",
+    authDomain: "register-7883a.firebaseapp.com",
+    projectId: "register-7883a",
+    storageBucket: "register-7883a.appspot.com",
+    messagingSenderId: "900344098901",
+    appId: "1:900344098901:web:b95b608dacbac8285964dc"
+  };
   firebase.initializeApp(firebaseConfig);
   const auth = firebase.auth();
   const db = firebase.database();
 
+  // ==== Elements ====
   const adminEmails = ["admin@jedabisnis.com"];
+  const authSection = document.getElementById("auth-section");
+  const registerSection = document.getElementById("register-section");
+  const adminSection = document.getElementById("admin-section");
+  const daftarBtn = document.getElementById("daftarBtn");
+  const ordersList = document.getElementById("ordersList");
+  const progressSection = document.getElementById("progressSection");
+  const popup = document.getElementById("popup");
+  const popupText = document.getElementById("popupText");
 
-  const authSection=document.getElementById("auth-section");
-  const registerSection=document.getElementById("register-section");
-  const adminSection=document.getElementById("admin-section");
-  const daftarBtn=document.getElementById("daftarBtn");
-  const ordersList=document.getElementById("ordersList");
-  const progressSection=document.getElementById("progressSection");
-  const popup=document.getElementById("popup");
-  const popupText=document.getElementById("popupText");
-
-  document.getElementById("googleLogin").onclick=async()=>{
-    const provider=new firebase.auth.GoogleAuthProvider();
-    const result=await auth.signInWithPopup(provider);
-    const user=result.user;
-    checkRole(user);
+  // ==== Login ====
+  document.getElementById("googleLogin").onclick = async () => {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    try {
+      const result = await auth.signInWithPopup(provider);
+      checkRole(result.user);
+    } catch (e) {
+      alert("Login gagal, coba lagi.");
+      console.error(e);
+    }
   };
 
-  function checkRole(user){
+  // ==== Role Check ====
+  function checkRole(user) {
     authSection.classList.add("hidden");
-    if(adminEmails.includes(user.email)){
+    if (adminEmails.includes(user.email)) {
       adminSection.classList.remove("hidden");
       loadOrders();
-    }else{
+    } else {
       registerSection.classList.remove("hidden");
       loadUserOrder(user.email);
     }
   }
 
-  daftarBtn.onclick=()=>{
-    const nama=document.getElementById("namaBisnis").value;
-    const jenis=document.getElementById("jenisBisnis").value;
-    const telp=document.getElementById("telepon").value;
-    const user=auth.currentUser;
-    if(!nama||!jenis||!telp){alert("Lengkapi semua data!");return;}
-    const newRef=db.ref("orders").push();
+  // ==== Register Bisnis ====
+  daftarBtn.onclick = () => {
+    const nama = document.getElementById("namaBisnis").value.trim();
+    const jenis = document.getElementById("jenisBisnis").value.trim();
+    const telp = document.getElementById("telepon").value.trim();
+    const user = auth.currentUser;
+    if (!nama || !jenis || !telp) return alert("Lengkapi semua data!");
+    const newRef = db.ref("orders").push();
     newRef.set({
-      userEmail:user.email,
-      namaBisnis:nama,
-      jenisBisnis:jenis,
-      telepon:telp,
-      status:"Menunggu Pembayaran",
-      dashboardLink:"",
-      infoDashboard:""
+      userEmail: user.email,
+      namaBisnis: nama,
+      jenisBisnis: jenis,
+      telepon: telp,
+      status: "Menunggu Pembayaran",
+      dashboardLink: "",
+      infoDashboard: ""
     });
-    document.getElementById("regInfo").innerText="Pendaftaran berhasil! Menunggu pembayaran...";
+    document.getElementById("regInfo").innerText = "Pendaftaran berhasil! Menunggu pembayaran...";
   };
 
-  // === USER MELIHAT PROGRESNYA ===
-  function loadUserOrder(email){
-    db.ref("orders").orderByChild("userEmail").equalTo(email).on("value",snap=>{
-      progressSection.innerHTML="";
-      snap.forEach(child=>{
-        const d=child.val();
-        const div=document.createElement("div");
-        div.innerHTML=`
+  // ==== Load Pesanan User ====
+  function loadUserOrder(email) {
+    db.ref("orders").orderByChild("userEmail").equalTo(email).on("value", snap => {
+      progressSection.innerHTML = "";
+      snap.forEach(child => {
+        const d = child.val();
+        const div = document.createElement("div");
+        div.innerHTML = `
           <p><b>${d.namaBisnis}</b></p>
           <p>Status: ${d.status}</p>
-          ${d.status==="Dashboard Berhasil Dibuat" ? 
-            `<p><a class="info-link" onclick="showInfo('${child.key}')">Lihat Informasi</a></p>`:""}
+          ${d.status === "Dashboard Berhasil Dibuat"
+            ? `<p><a class="info-link" onclick="showInfo('${child.key}')">Lihat Informasi</a></p>`
+            : ""}
         `;
         progressSection.appendChild(div);
       });
     });
   }
 
-  // === ADMIN DASHBOARD ===
-  function loadOrders(){
-    db.ref("orders").on("value",snap=>{
-      ordersList.innerHTML="";
-      snap.forEach(child=>{
-        const data=child.val();
-        const tr=document.createElement("tr");
-        tr.innerHTML=`
-          <td>${data.namaBisnis}</td>
-          <td>${data.userEmail}</td>
-          <td>${data.status}</td>
-          <td>
-            <button onclick="nextStage('${child.key}')">Lanjut</button>
-            <button onclick="cancelOrder('${child.key}')">Batalkan</button>
-          </td>`;
+  // ==== Load Semua Pesanan (Admin) ====
+  function loadOrders() {
+    db.ref("orders").on("value", snap => {
+      ordersList.innerHTML = "";
+      snap.forEach(child => {
+        const d = child.val();
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td data-label="Nama Bisnis">${d.namaBisnis}</td>
+          <td data-label="Pemilik">${d.userEmail}</td>
+          <td data-label="Status">${d.status}</td>
+          <td data-label="Tindakan">
+            ${d.status !== "Dashboard Berhasil Dibuat"
+              ? `<button onclick="nextStage('${child.key}')">Lanjut</button>` : ""}
+            ${d.status === "Menunggu Pembayaran"
+              ? `<button onclick="cancelOrder('${child.key}')">Batalkan</button>` : ""}
+          </td>
+        `;
         ordersList.appendChild(tr);
       });
     });
   }
 
-  const stages=[
+  const stages = [
     "Menunggu Pembayaran",
     "Menunggu Konfirmasi Admin",
     "Admin Telah Mengkonfirmasi",
@@ -206,42 +302,48 @@
     "Dashboard Berhasil Dibuat"
   ];
 
-  window.nextStage=(id)=>{
-    const ref=db.ref("orders/"+id);
-    ref.once("value",snap=>{
-      const data=snap.val();
-      let nextIndex=stages.indexOf(data.status)+1;
-      if(nextIndex>=stages.length)return;
-      const newStatus=stages[nextIndex];
-      const updates={status:newStatus};
-      if(newStatus==="Dashboard Berhasil Dibuat"){
-        const link=prompt("Masukkan link dashboard:");
-        const info=prompt("Tulis informasi tambahan untuk user:");
-        if(link)updates.dashboardLink=link;
-        if(info)updates.infoDashboard=info;
+  // ==== Fungsi Admin ====
+  window.nextStage = id => {
+    const ref = db.ref("orders/" + id);
+    ref.once("value", snap => {
+      const data = snap.val();
+      let nextIndex = stages.indexOf(data.status) + 1;
+      if (nextIndex >= stages.length) return;
+      const newStatus = stages[nextIndex];
+      const updates = { status: newStatus };
+      if (newStatus === "Dashboard Berhasil Dibuat") {
+        const link = prompt("Masukkan link dashboard:");
+        const info = prompt("Tulis informasi tambahan untuk user:");
+        if (link) updates.dashboardLink = link;
+        if (info) updates.infoDashboard = info;
       }
       ref.update(updates);
     });
   };
 
-  window.cancelOrder=(id)=>{
-    if(confirm("Batalkan pesanan ini?")) db.ref("orders/"+id).remove();
+  window.cancelOrder = id => {
+    if (confirm("Batalkan pesanan ini?")) db.ref("orders/" + id).remove();
   };
 
-  // === POPUP INFORMASI USER ===
-  window.showInfo=(id)=>{
-    db.ref("orders/"+id).once("value",snap=>{
-      const d=snap.val();
-      popupText.innerHTML=`
-        <p><b>Link Dashboard:</b> <a href="${d.dashboardLink}" target="_blank">${d.dashboardLink}</a></p>
-        <p>${d.infoDashboard}</p>
+  // ==== Popup ====
+  window.showInfo = id => {
+    db.ref("orders/" + id).once("value", snap => {
+      const d = snap.val();
+      const safeLink = d.dashboardLink.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+      const safeInfo = d.infoDashboard.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+      popupText.innerHTML = `
+        <p><b>Link Dashboard:</b> <a href="${safeLink}" target="_blank">${safeLink}</a></p>
+        <p>${safeInfo}</p>
       `;
       popup.classList.remove("hidden");
     });
   };
-  window.closePopup=()=>popup.classList.add("hidden");
 
-  auth.onAuthStateChanged(u=>{if(u)checkRole(u);});
+  window.closePopup = () => popup.classList.add("hidden");
+
+  // ==== Auto Login Check ====
+  auth.onAuthStateChanged(u => { if (u) checkRole(u); });
 </script>
+
 </body>
 </html>
