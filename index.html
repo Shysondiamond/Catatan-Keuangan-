@@ -1472,5 +1472,18 @@
     // Kode JavaScript Anda yang lain (Chart.js, Firebase, dll.) dapat ditempatkan di sini
   });
 </script>
+
+
+  <script>
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker
+        .register("/Catatan-Keuangan-/sw.js")
+        .then(() => console.log("Service Worker registered!"))
+        .catch(err => console.log("SW registration failed: ", err));
+    });
+  }
+</script>
+
 </body>
 </html>
