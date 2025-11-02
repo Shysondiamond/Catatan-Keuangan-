@@ -1,32 +1,127 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <title>Admin - JedaBisnis</title>
+  <meta charset="UTF-8" />
+  <title>JedaBisnis</title>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
   <style>
-    body { background:#0e0e17; color:white; font-family:Inter,sans-serif; padding:2rem; }
-    h1 { color:#ff85c1; }
-    table { width:100%; border-collapse:collapse; margin-top:1rem; }
-    th, td { padding:8px; border-bottom:1px solid rgba(255,255,255,0.1); }
-    img { max-width:60px; border-radius:8px; }
-    button { background:#ff85c1; border:none; color:white; padding:5px 10px; border-radius:6px; cursor:pointer; }
-    button:hover { background:#ff6fab; }
+    body {
+      font-family: "Inter", sans-serif;
+      background: radial-gradient(circle at top, #0e0e17, #080810);
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      flex-direction: column;
+    }
+
+    .card {
+      background: rgba(255,255,255,0.05);
+      padding: 2rem;
+      border-radius: 1rem;
+      width: 90%;
+      max-width: 600px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+      text-align: center;
+    }
+
+    h1 { color: #ff85c1; }
+    input, textarea {
+      width: 100%; margin: 8px 0; padding: 10px;
+      border: none; border-radius: 6px;
+      background: rgba(255,255,255,0.1); color: white;
+    }
+    button {
+      background: #ff85c1; border: none; color: white;
+      padding: 10px 16px; border-radius: 6px;
+      cursor: pointer; margin-top: 10px;
+    }
+    button:hover { background: #ff6fab; }
+
+    #dashboard-section, #admin-section { display: none; }
+
+    table {
+      width: 100%; margin-top: 1rem; border-collapse: collapse;
+    }
+    th, td {
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      padding: 8px; text-align: left;
+    }
+    img.payment-preview { max-width: 80px; border-radius: 8px; margin-top: 8px; }
+
+    .popup {
+      display: none;
+      position: fixed; top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.6);
+      justify-content: center; align-items: center;
+    }
+    .popup-content {
+      background: #1a1a24; padding: 20px; border-radius: 8px;
+      width: 90%; max-width: 400px;
+    }
   </style>
 </head>
 <body>
-  <h1>Dashboard Admin</h1>
-  <button id="logoutBtn">Logout</button>
-  <table>
-    <thead><tr><th>Nama</th><th>Jenis</th><th>Telepon</th><th>Pemilik</th><th>Status</th><th>Bukti</th><th>Aksi</th></tr></thead>
-    <tbody id="businessList"></tbody>
-  </table>
+  <!-- LOGIN SECTION -->
+  <section id="login-section" class="card">
+    <h1>JedaBisnis</h1>
+    <button id="loginBtn">🔑 Login dengan Google</button>
+    <p style="margin-top:10px;">Silakan login untuk mengakses dashboard Anda.</p>
+  </section>
+
+  <!-- DASHBOARD USER -->
+  <section id="dashboard-section" class="card">
+    <h1>Dashboard Pengguna</h1>
+    <button id="logoutBtn" style="float:right;">Logout</button>
+    <h3>Tambah Bisnis Baru</h3>
+    <input id="namaBisnis" placeholder="Nama Bisnis" />
+    <input id="jenisBisnis" placeholder="Jenis Bisnis" />
+    <input id="nomorTelepon" placeholder="Nomor Telepon" />
+
+    <p>💳 Pembayaran via <b>DANA: Mochamad Rifaldo Efendi - 085171117627</b></p>
+    <input type="file" id="buktiPembayaran" accept="image/*" />
+    <button id="daftarBtn">Daftar Sekarang</button>
+
+    <h3 style="margin-top:20px;">Daftar Bisnis Saya</h3>
+    <table>
+      <thead>
+        <tr><th>Nama</th><th>Jenis</th><th>Status</th><th>Aksi</th></tr>
+      </thead>
+      <tbody id="userBusinessList"></tbody>
+    </table>
+  </section>
+
+  <!-- DASHBOARD ADMIN -->
+  <section id="admin-section" class="card">
+    <h1>Dashboard Admin</h1>
+    <button id="logoutBtn2" style="float:right;">Logout</button>
+    <h3>Daftar Semua Bisnis</h3>
+    <table>
+      <thead>
+        <tr><th>Nama</th><th>Jenis</th><th>Telepon</th><th>Pemilik</th><th>Status</th><th>Bukti</th><th>Aksi</th></tr>
+      </thead>
+      <tbody id="adminBusinessList"></tbody>
+    </table>
+  </section>
+
+  <!-- POPUP INFORMASI -->
+  <div class="popup" id="popupInfo">
+    <div class="popup-content">
+      <h3>Informasi Progres</h3>
+      <p id="popupMessage"></p>
+      <button onclick="closePopup()">Tutup</button>
+    </div>
+  </div>
 
   <script>
+    // KONFIGURASI FIREBASE
     const firebaseConfig = {
-      apiKey: "ISI_API_KEY_KAMU",
+      apiKey: "ISI_API_KEY",
       authDomain: "ISI_AUTH_DOMAIN",
       databaseURL: "ISI_DATABASE_URL",
       projectId: "ISI_PROJECT_ID",
@@ -38,48 +133,151 @@
     const db = firebase.database();
     const auth = firebase.auth();
 
-    const adminEmails = ["admin@gmail.com", "rifaldo@jedabisnis.com"];
-    const list = document.getElementById('businessList');
+    const loginSection = document.getElementById('login-section');
+    const dashboardSection = document.getElementById('dashboard-section');
+    const adminSection = document.getElementById('admin-section');
+    const loginBtn = document.getElementById('loginBtn');
     const logoutBtn = document.getElementById('logoutBtn');
+    const logoutBtn2 = document.getElementById('logoutBtn2');
+    const daftarBtn = document.getElementById('daftarBtn');
+    const userBusinessList = document.getElementById('userBusinessList');
+    const adminBusinessList = document.getElementById('adminBusinessList');
 
-    logoutBtn.onclick = () => auth.signOut();
+    const popup = document.getElementById('popupInfo');
+    const popupMessage = document.getElementById('popupMessage');
+    function closePopup(){ popup.style.display = 'none'; }
 
-    auth.onAuthStateChanged(user => {
-      if (!user) return window.location.href = "index.html";
-      if (!adminEmails.includes(user.email)) return window.location.href = "index.html";
-      loadData();
+    const adminEmails = ["admin@gmail.com","rifaldoefendi@gmail.com"]; // tambahkan admin di sini
+
+    // LOGIN GOOGLE
+    loginBtn.onclick = () => {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      auth.signInWithPopup(provider);
+    };
+
+    // LOGOUT
+    function handleLogout(){
+      auth.signOut().then(()=>{
+        alert("Anda telah logout.");
+        loginSection.style.display='block';
+        dashboardSection.style.display='none';
+        adminSection.style.display='none';
+      });
+    }
+    logoutBtn.onclick = handleLogout;
+    logoutBtn2.onclick = handleLogout;
+
+    // STATUS LOGIN
+    auth.onAuthStateChanged(user=>{
+      if(user){
+        if(adminEmails.includes(user.email)){
+          showAdminDashboard();
+        } else {
+          showUserDashboard();
+        }
+      } else {
+        loginSection.style.display='block';
+        dashboardSection.style.display='none';
+        adminSection.style.display='none';
+      }
     });
 
-    function loadData() {
-      db.ref('bisnis').on('value', snap => {
-        list.innerHTML = '';
-        snap.forEach(child => {
-          const key = child.key;
-          const b = child.val();
-          const row = document.createElement('tr');
-          row.innerHTML = `
+    function showUserDashboard(){
+      loginSection.style.display='none';
+      dashboardSection.style.display='block';
+      adminSection.style.display='none';
+      loadUserBisnis();
+    }
+
+    function showAdminDashboard(){
+      loginSection.style.display='none';
+      dashboardSection.style.display='none';
+      adminSection.style.display='block';
+      loadAdminBisnis();
+    }
+
+    // TAMBAH BISNIS BARU
+    daftarBtn.onclick = ()=>{
+      const nama = document.getElementById('namaBisnis').value;
+      const jenis = document.getElementById('jenisBisnis').value;
+      const telp = document.getElementById('nomorTelepon').value;
+      const fileInput = document.getElementById('buktiPembayaran');
+      const user = auth.currentUser;
+      if(!nama || !jenis || !telp || !fileInput.files[0]) return alert("Isi semua data dan unggah bukti!");
+
+      const reader = new FileReader();
+      reader.onload = e=>{
+        db.ref('bisnis').push({
+          nama, jenis, telp,
+          bukti: e.target.result,
+          status: "Menunggu Konfirmasi",
+          pesan: "",
+          pemilik: user.email
+        });
+        alert("Bisnis berhasil dikirim!");
+        fileInput.value="";
+      };
+      reader.readAsDataURL(fileInput.files[0]);
+    };
+
+    // MUAT BISNIS USER
+    function loadUserBisnis(){
+      const user = auth.currentUser;
+      db.ref('bisnis').orderByChild('pemilik').equalTo(user.email)
+        .on('value',snap=>{
+          userBusinessList.innerHTML="";
+          snap.forEach(child=>{
+            const b = child.val();
+            const tr=document.createElement('tr');
+            tr.innerHTML=`
+              <td>${b.nama}</td>
+              <td>${b.jenis}</td>
+              <td>${b.status}</td>
+              <td><button onclick="showInfo('${b.pesan||'Belum ada pesan'}')">Info</button></td>
+            `;
+            userBusinessList.appendChild(tr);
+          });
+        });
+    }
+
+    // MUAT BISNIS ADMIN
+    function loadAdminBisnis(){
+      db.ref('bisnis').on('value',snap=>{
+        adminBusinessList.innerHTML="";
+        snap.forEach(child=>{
+          const id=child.key;
+          const b=child.val();
+          const tr=document.createElement('tr');
+          tr.innerHTML=`
             <td>${b.nama}</td>
             <td>${b.jenis}</td>
             <td>${b.telp}</td>
             <td>${b.pemilik}</td>
             <td>${b.status}</td>
-            <td>${b.bukti ? `<img src="${b.bukti}">` : '-'}</td>
+            <td>${b.bukti ? `<img class='payment-preview' src='${b.bukti}'/>` : '-'}</td>
             <td>
-              <button onclick="beriPesan('${key}','Diterima')">✅ Setujui</button>
-              <button onclick="beriPesan('${key}','Ditolak')">❌ Tolak</button>
+              <button onclick="setujui('${id}')">Setujui</button>
+              <button onclick="tulisPesan('${id}')">Pesan</button>
             </td>
           `;
-          list.appendChild(row);
+          adminBusinessList.appendChild(tr);
         });
       });
     }
 
-    function beriPesan(id, status) {
+    function showInfo(msg){
+      popupMessage.innerText=msg;
+      popup.style.display='flex';
+    }
+
+    function setujui(id){
+      db.ref('bisnis/'+id).update({status:"Disetujui"});
+      alert("Bisnis disetujui!");
+    }
+
+    function tulisPesan(id){
       const pesan = prompt("Tulis pesan untuk pengguna:");
-      if (pesan !== null) {
-        db.ref('bisnis/' + id).update({ status, pesan });
-        alert("Status diubah menjadi " + status);
-      }
+      if(pesan) db.ref('bisnis/'+id).update({pesan});
     }
   </script>
 </body>
