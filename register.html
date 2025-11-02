@@ -1,283 +1,85 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <title>JedaBisnis</title>
+  <meta charset="UTF-8">
+  <title>Admin - JedaBisnis</title>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-
   <style>
-    body {
-      font-family: "Inter", sans-serif;
-      background: radial-gradient(circle at top, #0e0e17, #080810);
-      color: white;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      flex-direction: column;
-      margin: 0;
-    }
-
-    .card {
-      background: rgba(255,255,255,0.05);
-      padding: 2rem;
-      border-radius: 1rem;
-      width: 90%;
-      max-width: 500px;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.5);
-      text-align: center;
-      backdrop-filter: blur(8px);
-    }
-
-    h1 {
-      color: #ff85c1;
-    }
-
-    input {
-      width: 100%;
-      margin: 8px 0;
-      padding: 10px;
-      border: none;
-      border-radius: 6px;
-      background: rgba(255,255,255,0.1);
-      color: white;
-    }
-
-    button {
-      background: #ff85c1;
-      border: none;
-      color: white;
-      padding: 10px 16px;
-      border-radius: 6px;
-      cursor: pointer;
-      margin-top: 10px;
-      transition: 0.2s;
-    }
-
-    button:hover {
-      background: #ff6fab;
-    }
-
-    #dashboard-section {
-      display: none;
-    }
-
-    table {
-      width: 100%;
-      margin-top: 1rem;
-      border-collapse: collapse;
-    }
-
-    th, td {
-      border-bottom: 1px solid rgba(255,255,255,0.1);
-      padding: 8px;
-      text-align: left;
-    }
-
-    img.payment-preview {
-      max-width: 80px;
-      border-radius: 8px;
-      margin-top: 8px;
-    }
-
-    #logoutBtn {
-      float: right;
-      background: #444;
-      padding: 6px 12px;
-    }
-
-    #logoutBtn:hover {
-      background: #666;
-    }
-
-    .google-btn {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: #ff85c1;
-      color: white;
-      font-weight: bold;
-      padding: 10px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: 0.2s;
-    }
-
-    .google-btn img {
-      width: 20px;
-      margin-right: 8px;
-    }
-
-    .google-btn:hover {
-      background: #ff6fab;
-    }
+    body { background:#0e0e17; color:white; font-family:Inter,sans-serif; padding:2rem; }
+    h1 { color:#ff85c1; }
+    table { width:100%; border-collapse:collapse; margin-top:1rem; }
+    th, td { padding:8px; border-bottom:1px solid rgba(255,255,255,0.1); }
+    img { max-width:60px; border-radius:8px; }
+    button { background:#ff85c1; border:none; color:white; padding:5px 10px; border-radius:6px; cursor:pointer; }
+    button:hover { background:#ff6fab; }
   </style>
 </head>
 <body>
-
-  <!-- LOGIN SECTION -->
-  <section id="login-section" class="card">
-    <h1>JedaBisnis</h1>
-    <button class="google-btn" id="loginBtn">
-      <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google Logo">
-      Login dengan Google
-    </button>
-    <p style="margin-top:10px;color:#bbb;font-size:14px;">
-      Silakan login untuk mendaftarkan bisnis baru atau mengakses dashboard Anda.
-    </p>
-  </section>
-
-  <!-- DASHBOARD SECTION -->
-  <section id="dashboard-section" class="card">
-    <button id="logoutBtn">Logout</button>
-    <h1 id="dashboardTitle">Dashboard</h1>
-
-    <h3 id="formTitle">Tambah Bisnis Baru</h3>
-    <input id="namaBisnis" placeholder="Nama Bisnis" />
-    <input id="jenisBisnis" placeholder="Jenis Bisnis" />
-    <input id="nomorTelepon" placeholder="Nomor Telepon" />
-
-    <p>💳 Pembayaran via <b>DANA: Mochamad Rifaldo Efendi - 085171117627</b></p>
-    <input type="file" id="buktiPembayaran" accept="image/*" />
-    <button id="daftarBtn">Daftar Sekarang</button>
-
-    <h3 style="margin-top:20px;">Daftar Bisnis</h3>
-    <table>
-      <thead>
-        <tr>
-          <th>Nama</th>
-          <th>Jenis</th>
-          <th>Telepon</th>
-          <th>Status</th>
-          <th>Bukti</th>
-        </tr>
-      </thead>
-      <tbody id="businessList"></tbody>
-    </table>
-  </section>
+  <h1>Dashboard Admin</h1>
+  <button id="logoutBtn">Logout</button>
+  <table>
+    <thead><tr><th>Nama</th><th>Jenis</th><th>Telepon</th><th>Pemilik</th><th>Status</th><th>Bukti</th><th>Aksi</th></tr></thead>
+    <tbody id="businessList"></tbody>
+  </table>
 
   <script>
-    // === KONFIGURASI FIREBASE ===
     const firebaseConfig = {
-  apiKey: "AIzaSyD_4hkC5918dHoQEOqyZ7FHR02eHx25rzM",
-  authDomain: "register-7883a.firebaseapp.com",
-  projectId: "register-7883a",
-  storageBucket: "register-7883a.firebasestorage.app",
-  messagingSenderId: "900344098901",
-  appId: "1:900344098901:web:b95b608dacbac8285964dc",
-  measurementId: "G-L3CGV1P69Y"
-};
+      apiKey: "ISI_API_KEY_KAMU",
+      authDomain: "ISI_AUTH_DOMAIN",
+      databaseURL: "ISI_DATABASE_URL",
+      projectId: "ISI_PROJECT_ID",
+      storageBucket: "ISI_STORAGE_BUCKET",
+      messagingSenderId: "ISI_MSG_SENDER_ID",
+      appId: "ISI_APP_ID"
+    };
     firebase.initializeApp(firebaseConfig);
-
     const db = firebase.database();
     const auth = firebase.auth();
 
-    // === DAFTAR ADMIN ===
-    const adminEmails = ["shysondiamond@gmail.com"]; // ubah sesuai kebutuhan
-
-    const loginSection = document.getElementById('login-section');
-    const dashboardSection = document.getElementById('dashboard-section');
-    const loginBtn = document.getElementById('loginBtn');
+    const adminEmails = ["admin@gmail.com", "rifaldo@jedabisnis.com"];
+    const list = document.getElementById('businessList');
     const logoutBtn = document.getElementById('logoutBtn');
-    const daftarBtn = document.getElementById('daftarBtn');
-    const businessList = document.getElementById('businessList');
-    const dashboardTitle = document.getElementById('dashboardTitle');
-    const formTitle = document.getElementById('formTitle');
 
-    // === LOGIN GOOGLE ===
-    loginBtn.onclick = () => {
-      const provider = new firebase.auth.GoogleAuthProvider();
-      auth.signInWithPopup(provider);
-    };
+    logoutBtn.onclick = () => auth.signOut();
 
-    // === LOGOUT ===
-    logoutBtn.onclick = () => {
-      auth.signOut();
-    };
-
-    // === PANTAU STATUS LOGIN ===
     auth.onAuthStateChanged(user => {
-      if (user) {
-        const isAdmin = adminEmails.includes(user.email);
-
-        loginSection.style.display = 'none';
-        dashboardSection.style.display = 'block';
-        logoutBtn.style.display = 'inline-block';
-
-        dashboardTitle.textContent = isAdmin ? "Dashboard Admin" : "Dashboard Pengguna";
-        formTitle.textContent = isAdmin ? "Tambah Bisnis Baru" : "Daftarkan Bisnis Anda";
-
-        loadBisnis(isAdmin, user.email);
-      } else {
-        loginSection.style.display = 'block';
-        dashboardSection.style.display = 'none';
-        logoutBtn.style.display = 'none';
-      }
+      if (!user) return window.location.href = "index.html";
+      if (!adminEmails.includes(user.email)) return window.location.href = "index.html";
+      loadData();
     });
 
-    // === TAMBAH BISNIS BARU ===
-    daftarBtn.onclick = async () => {
-      const user = auth.currentUser;
-      if (!user) return alert("Silakan login dulu.");
-
-      const nama = document.getElementById('namaBisnis').value;
-      const jenis = document.getElementById('jenisBisnis').value;
-      const telp = document.getElementById('nomorTelepon').value;
-      const fileInput = document.getElementById('buktiPembayaran');
-
-      if (!nama || !jenis || !telp) {
-        alert("Harap isi semua data bisnis!");
-        return;
-      }
-
-      if (!fileInput.files[0]) {
-        alert("Harap unggah bukti pembayaran.");
-        return;
-      }
-
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        const buktiBase64 = e.target.result;
-        const newRef = db.ref('bisnis').push();
-        newRef.set({
-          nama,
-          jenis,
-          telp,
-          bukti: buktiBase64,
-          status: "Menunggu Konfirmasi",
-          pemilik: user.email
-        });
-        alert("Bisnis berhasil didaftarkan!");
-        fileInput.value = '';
-        document.getElementById('namaBisnis').value = '';
-        document.getElementById('jenisBisnis').value = '';
-        document.getElementById('nomorTelepon').value = '';
-      };
-      reader.readAsDataURL(fileInput.files[0]);
-    };
-
-    // === MUAT DATA BISNIS ===
-    function loadBisnis(isAdmin, userEmail) {
-      db.ref('bisnis').on('value', (snap) => {
-        businessList.innerHTML = '';
-        snap.forEach((child) => {
+    function loadData() {
+      db.ref('bisnis').on('value', snap => {
+        list.innerHTML = '';
+        snap.forEach(child => {
+          const key = child.key;
           const b = child.val();
-          if (!isAdmin && b.pemilik !== userEmail) return;
-
           const row = document.createElement('tr');
           row.innerHTML = `
             <td>${b.nama}</td>
             <td>${b.jenis}</td>
             <td>${b.telp}</td>
+            <td>${b.pemilik}</td>
             <td>${b.status}</td>
-            <td>${b.bukti ? `<img class="payment-preview" src="${b.bukti}" />` : '-'}</td>
+            <td>${b.bukti ? `<img src="${b.bukti}">` : '-'}</td>
+            <td>
+              <button onclick="beriPesan('${key}','Diterima')">✅ Setujui</button>
+              <button onclick="beriPesan('${key}','Ditolak')">❌ Tolak</button>
+            </td>
           `;
-          businessList.appendChild(row);
+          list.appendChild(row);
         });
       });
+    }
+
+    function beriPesan(id, status) {
+      const pesan = prompt("Tulis pesan untuk pengguna:");
+      if (pesan !== null) {
+        db.ref('bisnis/' + id).update({ status, pesan });
+        alert("Status diubah menjadi " + status);
+      }
     }
   </script>
 </body>
