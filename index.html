@@ -556,39 +556,40 @@ ease;
   }
 </script>
 
+<script>
+// Scroll satu slide per aksi scroll
+const container = document.querySelector('.slides-container');
+const slides = document.querySelectorAll('.slide');
+let isScrolling = false;
 
-<!-- Fullpage Scroll Script -->
-  <script>
-    const container = document.querySelector('.slides-container');
-    const slides = document.querySelectorAll('.slide');
-    let currentSlide = 0;
-    let isScrolling = false;
+container.addEventListener('wheel', (e) => {
+  e.preventDefault(); // hentikan default scroll
+  if (isScrolling) return; // cegah spam scroll cepat
+  isScrolling = true;
 
-    function scrollToSlide(index) {
-      if (index < 0 || index >= slides.length) return;
-      isScrolling = true;
-      slides[index].scrollIntoView({ behavior: 'smooth' });
-      currentSlide = index;
-      setTimeout(() => isScrolling = false, 1000);
-    }
+  const direction = e.deltaY > 0 ? 1 : -1; // arah scroll
+  const currentScroll = container.scrollTop;
+  const slideHeight = window.innerHeight;
 
-    window.addEventListener('wheel', (e) => {
-      if (isScrolling) return;
-      e.preventDefault();
-      if (e.deltaY > 0) scrollToSlide(currentSlide + 1);
-      else scrollToSlide(currentSlide - 1);
-    }, { passive: false });
+  // Hitung indeks slide sekarang
+  let currentIndex = Math.round(currentScroll / slideHeight);
+  let nextIndex = currentIndex + direction;
 
-    let startY = 0;
-    window.addEventListener('touchstart', e => startY = e.touches[0].clientY);
-    window.addEventListener('touchend', e => {
-      const endY = e.changedTouches[0].clientY;
-      const diffY = startY - endY;
-      if (Math.abs(diffY) < 50 || isScrolling) return;
-      if (diffY > 0) scrollToSlide(currentSlide + 1);
-      else scrollToSlide(currentSlide - 1);
-    });
-  </script>
+  // Batasi agar tidak keluar dari range slide
+  nextIndex = Math.max(0, Math.min(nextIndex, slides.length - 1));
+
+  container.scrollTo({
+    top: nextIndex * slideHeight,
+    behavior: 'smooth'
+  });
+
+  // Delay untuk menunggu animasi scroll selesai
+  setTimeout(() => {
+    isScrolling = false;
+  }, 1000);
+}, { passive: false });
+</script>
+
 
 </body>
 </html>
