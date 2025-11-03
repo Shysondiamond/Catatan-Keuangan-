@@ -556,46 +556,39 @@ ease;
   }
 </script>
 
+
+<!-- Fullpage Scroll Script -->
   <script>
-  const container = document.querySelector('.slides-container');
-  const slides = document.querySelectorAll('.slide');
-  let currentSlide = 0;
-  let isScrolling = false;
+    const container = document.querySelector('.slides-container');
+    const slides = document.querySelectorAll('.slide');
+    let currentSlide = 0;
+    let isScrolling = false;
 
-  function scrollToSlide(index) {
-    if (index < 0 || index >= slides.length) return;
-    isScrolling = true;
-    slides[index].scrollIntoView({ behavior: 'smooth' });
-    currentSlide = index;
-    setTimeout(() => isScrolling = false, 1000); // jeda agar tidak bisa spam scroll
-  }
-
-  container.addEventListener('wheel', (e) => {
-    if (isScrolling) return;
-    e.preventDefault();
-    if (e.deltaY > 0) {
-      scrollToSlide(currentSlide + 1);
-    } else {
-      scrollToSlide(currentSlide - 1);
+    function scrollToSlide(index) {
+      if (index < 0 || index >= slides.length) return;
+      isScrolling = true;
+      slides[index].scrollIntoView({ behavior: 'smooth' });
+      currentSlide = index;
+      setTimeout(() => isScrolling = false, 1000);
     }
-  }, { passive: false });
 
-  // Dukungan untuk gesture sentuh (mobile)
-  let startY = 0;
-  container.addEventListener('touchstart', (e) => {
-    startY = e.touches[0].clientY;
-  });
-  container.addEventListener('touchend', (e) => {
-    const endY = e.changedTouches[0].clientY;
-    const diffY = startY - endY;
-    if (Math.abs(diffY) < 50 || isScrolling) return; // abaikan gerakan kecil
-    if (diffY > 0) {
-      scrollToSlide(currentSlide + 1);
-    } else {
-      scrollToSlide(currentSlide - 1);
-    }
-  });
-</script>
+    window.addEventListener('wheel', (e) => {
+      if (isScrolling) return;
+      e.preventDefault();
+      if (e.deltaY > 0) scrollToSlide(currentSlide + 1);
+      else scrollToSlide(currentSlide - 1);
+    }, { passive: false });
+
+    let startY = 0;
+    window.addEventListener('touchstart', e => startY = e.touches[0].clientY);
+    window.addEventListener('touchend', e => {
+      const endY = e.changedTouches[0].clientY;
+      const diffY = startY - endY;
+      if (Math.abs(diffY) < 50 || isScrolling) return;
+      if (diffY > 0) scrollToSlide(currentSlide + 1);
+      else scrollToSlide(currentSlide - 1);
+    });
+  </script>
 
 </body>
 </html>
