@@ -6,25 +6,23 @@
   <title>JedaBisnis | Dashboard</title>
 
   <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#1c1c1c">
-   
-  
+  <meta name="theme-color" content="#1c1c1c">
+
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
-a {
-  text-decoration: none; /* Menghilangkan garis bawah dari semua tautan */
-}
+    a { text-decoration: none; }
+
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
-      scroll-behavior: smooth;
     }
 
     body {
       font-family: 'Poppins', sans-serif;
       color: #fff;
       overflow-x: hidden;
+      overflow-y: hidden; /* agar scroll diatur manual oleh JS */
     }
 
     /* Canvas Partikel */
@@ -37,13 +35,11 @@ a {
       background: radial-gradient(circle at top, #1b1b1b 0%, #121212 100%);
     }
 
-    /* Scroll Snap Container */
+    /* Container Slide */
     .slides-container {
       height: 100vh;
       width: 100vw;
-      overflow-y: scroll;
-      scroll-snap-type: y mandatory;
-      scroll-snap-stop: always;
+      overflow: hidden;
     }
 
     .slide {
@@ -54,14 +50,12 @@ a {
       align-items: center;
       justify-content: center;
       text-align: center;
-      scroll-snap-align: start;
       padding: 2rem;
       position: relative;
       z-index: 1;
       transition: background 0.6s ease-in-out;
     }
 
-    /* Warna Tiap Slide */
     .slide-1 { background: rgba(27,27,27,0.6); }
     .slide-2 { background: rgb(185 0 0 / 24%); }
     .slide-3 { background: rgb(255 152 0 / 24%); }
@@ -112,7 +106,6 @@ a {
       box-shadow: 0 0 15px rgba(255, 64, 129, 0.5);
     }
 
-    /* Profil */
     .profile {
       display: flex;
       flex-direction: column;
@@ -135,7 +128,6 @@ a {
       font-weight: 600;
     }
 
-    /* Pricing */
     .pricing {
       display: flex;
       flex-wrap: wrap;
@@ -159,25 +151,10 @@ a {
       box-shadow: 0 0 25px rgba(255, 255, 255, 0.2);
     }
 
-    .price-card h3 {
-      font-size: 1.3rem;
-      margin-bottom: 10px;
-    }
+    .price-card h3 { font-size: 1.3rem; margin-bottom: 10px; }
+    .price-card p { font-size: 0.95rem; margin-bottom: 20px; color: #ccc; }
+    .price { font-size: 1.5rem; font-weight: 700; color: #ff80c0; margin-bottom: 20px; }
 
-    .price-card p {
-      font-size: 0.95rem;
-      margin-bottom: 20px;
-      color: #ccc;
-    }
-
-    .price {
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: #ff80c0;
-      margin-bottom: 20px;
-    }
-
-    /* Scroll Indicator */
     .scroll-indicator {
       position: absolute;
       bottom: 20px;
@@ -197,28 +174,11 @@ a {
       animation: bounce 1.5s infinite;
     }
 
-    @keyframes bounce {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(5px); }
-    }
+    @keyframes bounce { 0%,100%{transform:translateY(0);}50%{transform:translateY(5px);} }
+    @keyframes fadeInDown { from{opacity:0;transform:translateY(-20px);}to{opacity:1;transform:translateY(0);} }
+    @keyframes fadeInUp { from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);} }
+    @keyframes fadeIn { from{opacity:0;}to{opacity:1;} }
 
-    /* Animations */
-    @keyframes fadeInDown {
-      from { opacity: 0; transform: translateY(-20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    @keyframes fadeInUp {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-
-    /* Responsive */
     @media (max-width: 600px) {
       h1 { font-size: 1.5rem; }
       p { font-size: 0.9rem; }
@@ -226,109 +186,74 @@ a {
       .btn { padding: 10px 20px; font-size: 0.9rem; }
       .price-card { width: 85%; }
     }
-    
-    /* Alert kecil modern */
-.alert {
-display: flex;
-    align-items: center;
-    gap: 10px;
-    /* background: rgba(255, 64, 129, 0.15); */
-    /* border: 1px solid rgba(255, 64, 129, 0.3); */
-    /* color: #ffcce0; */
-    padding: 8px 14px;
-    border-radius: 10px;
-    font-size: 10px;
-    /* max-width: 400px; */
-    text-align: left;
-    animation: fadeInUp 1s 
-ease;
-    backdrop-filter: blur(8px);
-    margin-top: 20px;
-}
 
-.alert svg {
-  width: 22px;
-  height: 22px;
-  stroke: #ff80c0;
-  flex-shrink: 0;
-}
+    .alert {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 14px;
+      border-radius: 10px;
+      font-size: 10px;
+      text-align: left;
+      animation: fadeInUp 1s ease;
+      backdrop-filter: blur(8px);
+      margin-top: 20px;
+    }
 
-
-
-.alert-yellow svg {
-  stroke: #ffca28;
-}
-
+    .alert svg { width: 22px; height: 22px; stroke: #ff80c0; flex-shrink: 0; }
+    .alert-yellow svg { stroke: #ffca28; }
   </style>
 </head>
 <body>
   <canvas id="particles"></canvas>
 
   <div class="slides-container">
-    <!-- Slide 1 -->
     <section class="slide slide-1">
       <h1>Selamat Datang di <span style="color:#ff4081;">JedaBisnis</span></h1>
       <p>Scroll untuk memilih bisnis Anda</p>
       <button class="btn btn-register" onclick="document.querySelector('.slide-4').scrollIntoView({behavior:'smooth'})">
         Belum Punya Dashboard? Daftar Sekarang!
       </button>
-<button id="installBtn" class='btn btn-register'>
-  📲 Install Aplikasi
-</button>
+      <button id="installBtn" class='btn btn-register'>📲 Install Aplikasi</button>
       <div class="scroll-indicator">
         <span>Scroll</span>
         <svg fill="#ff80c0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 21l-8-9h16z"/></svg>
       </div>
     </section>
 
-    <!-- Slide 2 -->
-<section class="slide slide-2">
-  <div class="profile">
-    <img src="/Catatan-Keuangan-/tokokopisumberurip.jpeg" alt="Toko Kopi Sumber Urip">
-    <span>Toko Kopi Sumber Urip</span>
-  </div>
+    <section class="slide slide-2">
+      <div class="profile">
+        <img src="/Catatan-Keuangan-/tokokopisumberurip.jpeg" alt="Toko Kopi Sumber Urip">
+        <span>Toko Kopi Sumber Urip</span>
+      </div>
+      <a href='/Catatan-Keuangan-/tokokopisumberurip.html' class="btn btn-login">Masuk ke Dashboard</a>
+      <div class="alert">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L4.34 16c-.77 1.333.192 3 1.732 3z" />
+        </svg>
+        <span>Hanya pemilik bisnis <strong>Toko Kopi Sumber Urip</strong> yang diizinkan mengakses dashboard ini.</span>
+      </div>
+    </section>
 
-<a  href='/Catatan-Keuangan-/tokokopisumberurip.html' class="btn btn-login">Masuk ke Dashboard</a>
+    <section class="slide slide-3">
+      <div class="profile">
+        <img src="/Catatan-Keuangan-/sugihwaraskopi.jpg">
+        <span>Sugih Waras Coffee</span>
+      </div>
+      <a href='/Catatan-Keuangan-/sugihwaras.html' class="btn btn-login">Masuk ke Dashboard</a>
+      <div class="alert alert-yellow">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L4.34 16c-.77 1.333.192 3 1.732 3z" />
+        </svg>
+        <span>Hanya pemilik bisnis <strong>Sugih Waras Coffee</strong> yang diizinkan mengakses dashboard ini.</span>
+      </div>
+    </section>
 
- <div class="alert">
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L4.34 16c-.77 1.333.192 3 1.732 3z" />
-    </svg>
-    <span>
-      Hanya pemilik bisnis <strong>Toko Kopi Sumber Urip</strong> yang diizinkan mengakses dashboard ini.
-    </span>
-  </div>
-
-</section>
-
-<!-- Slide 3 -->
-<section class="slide slide-3">
-  <div class="profile">
-    <img src="/Catatan-Keuangan-/sugihwaraskopi.jpg">
-    <span>Sugih Waras Coffee</span>
-  </div>
-
-  <a  href='/Catatan-Keuangan-/sugihwaras.html' class="btn btn-login">Masuk ke Dashboard</a>
-
-<div class="alert alert-yellow">
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L4.34 16c-.77 1.333.192 3 1.732 3z" />
-    </svg>
-    <span>
-      Hanya pemilik bisnis <strong>Sugih Waras Coffee</strong> yang diizinkan mengakses dashboard ini.
-    </span>
-  </div>
-
-</section>
-
-
-    <!-- Slide 4 -->
     <section class="slide slide-4">
       <h1>Daftar Akun JedaBisnis</h1>
       <p>Buat akun dashboard untuk memantau dan mencatat laporan keuangan bisnis Anda dengan mudah.</p>
-
       <div class="pricing">
         <div class="price-card">
           <h3>🏢 Premium</h3>
@@ -340,6 +265,7 @@ ease;
     </section>
   </div>
 
+  <!-- Partikel -->
   <script>
     const canvas = document.getElementById('particles');
     const ctx = canvas.getContext('2d');
@@ -380,180 +306,38 @@ ease;
     animateParticles();
   </script>
 
+  <!-- Fullpage Scroll Script -->
   <script>
-  let deferredPrompt;
-  const installBtn = document.getElementById("installBtn");
-  installBtn.style.display = "none";
+    const container = document.querySelector('.slides-container');
+    const slides = document.querySelectorAll('.slide');
+    let currentSlide = 0;
+    let isScrolling = false;
 
-  window.addEventListener("beforeinstallprompt", e => {
-    e.preventDefault();
-    deferredPrompt = e;
-    installBtn.style.display = "block";
-  });
-
-  installBtn.addEventListener("click", async () => {
-    if (deferredPrompt) {
-      deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
-      if (outcome === "accepted") {
-        console.log("User accepted install");
-      } else {
-        console.log("User dismissed install");
-      }
-      deferredPrompt = null;
-      installBtn.style.display = "none";
+    function scrollToSlide(index) {
+      if (index < 0 || index >= slides.length) return;
+      isScrolling = true;
+      slides[index].scrollIntoView({ behavior: 'smooth' });
+      currentSlide = index;
+      setTimeout(() => isScrolling = false, 1000);
     }
-  });
 
-  // Sembunyikan tombol kalau sudah terinstal
-  window.addEventListener("appinstalled", () => {
-    console.log("PWA installed!");
-    installBtn.style.display = "none";
-  });
-</script>
-
-
-  <!-- 🟣 Popup Daftar Akun JedaBisnis -->
-<div id="popupDaftar" style="
-  display:none;
-  position:fixed;
-  top:0; left:0;
-  width:100%; height:100%;
-  background:rgba(0,0,0,0.6);
-  backdrop-filter:blur(8px);
-  justify-content:center;
-  align-items:center;
-  z-index:999;
-">
-  <div style="
-    background:rgba(255,255,255,0.1);
-    border-radius:20px;
-    padding:30px 25px;
-    width:90%;
-    max-width:400px;
-    text-align:left;
-    color:#fff;
-    box-shadow:0 0 25px rgba(255,255,255,0.2);
-    animation:fadeInPopup 0.4s ease;
-  ">
-    <h2 style="text-align:center;color:#ff80c0;margin-bottom:15px;">Daftar Akun JedaBisnis</h2>
-
-    <label>Nama:</label>
-    <input id="nama" type="text" class="inputForm">
-    <small id="err-nama" class="errorMsg"></small>
-
-    <label>Nama Bisnis:</label>
-    <input id="namaBisnis" type="text" class="inputForm">
-    <small id="err-namaBisnis" class="errorMsg"></small>
-
-    <label>Kategori Bisnis:</label>
-    <input id="kategoriBisnis" type="text" class="inputForm">
-    <small id="err-kategoriBisnis" class="errorMsg"></small>
-
-    <label>Alamat Bisnis:</label>
-    <input id="alamatBisnis" type="text" class="inputForm">
-    <small id="err-alamatBisnis" class="errorMsg"></small>
-
-    <label>Metode Pembayaran:</label>
-    <div style="background:rgba(255,255,255,0.15);padding:10px;border-radius:8px;margin-bottom:10px;">
-      <strong>DANA</strong> — 085171117627 A/n Mochamad Rifaldo Efendi
-    </div>
-
-    <div style="margin-bottom:15px;">
-      <span style="text-decoration:line-through;color:#ccc;">Rp100.000</span>
-      <span style="color:#ff80c0;font-weight:700;margin-left:10px;">Rp99.000</span>
-    </div>
-
-    <button onclick="kirimWhatsApp()" style="width:100%;padding:12px;border:none;border-radius:30px;background:#ff4081;color:#fff;font-weight:600;cursor:pointer;">Kirim via WhatsApp</button>
-    <button onclick="tutupPopup()" style="width:100%;padding:12px;border:none;border-radius:30px;background:rgba(255,255,255,0.15);color:#fff;font-weight:600;cursor:pointer;margin-top:10px;">Tutup</button>
-  </div>
-</div>
-
-<style>
-@keyframes fadeInPopup {
-  from {opacity:0; transform:scale(0.9);}
-  to {opacity:1; transform:scale(1);}
-}
-
-.inputForm {
-  width:100%;
-  padding:10px;
-  border:none;
-  border-radius:8px;
-  margin-bottom:6px;
-  background-color:rgba(255,255,255,0.15);
-  color:white;
-}
-
-.inputForm.error {
-  border:1px solid #ff8080;
-  background-color:rgba(255,0,0,0.15);
-}
-
-.errorMsg {
-  color:#ff9090;
-  font-size:12px;
-  margin-bottom:8px;
-  display:none;
-}
-</style>
-
-<script>
-  // Buka popup ketika tombol "Daftar Sekarang!" ditekan
-  document.querySelectorAll('.btn.btn-register[href="/Catatan-Keuangan-/register.html"]').forEach(btn => {
-    btn.addEventListener('click', e => {
+    window.addEventListener('wheel', (e) => {
+      if (isScrolling) return;
       e.preventDefault();
-      document.getElementById('popupDaftar').style.display = 'flex';
+      if (e.deltaY > 0) scrollToSlide(currentSlide + 1);
+      else scrollToSlide(currentSlide - 1);
+    }, { passive: false });
+
+    let startY = 0;
+    window.addEventListener('touchstart', e => startY = e.touches[0].clientY);
+    window.addEventListener('touchend', e => {
+      const endY = e.changedTouches[0].clientY;
+      const diffY = startY - endY;
+      if (Math.abs(diffY) < 50 || isScrolling) return;
+      if (diffY > 0) scrollToSlide(currentSlide + 1);
+      else scrollToSlide(currentSlide - 1);
     });
-  });
+  </script>
 
-  // Tutup popup
-  function tutupPopup() {
-    document.getElementById('popupDaftar').style.display = 'none';
-  }
-
-  // Kirim ke WhatsApp dengan validasi wajib isi
-  function kirimWhatsApp() {
-    const fields = [
-      { id: 'nama', label: 'Nama' },
-      { id: 'namaBisnis', label: 'Nama Bisnis' },
-      { id: 'kategoriBisnis', label: 'Kategori Bisnis' },
-      { id: 'alamatBisnis', label: 'Alamat Bisnis' },
-    ];
-
-    let valid = true;
-
-    fields.forEach(f => {
-      const input = document.getElementById(f.id);
-      const err = document.getElementById(`err-${f.id}`);
-      if (input.value.trim() === '') {
-        input.classList.add('error');
-        err.textContent = `${f.label} wajib diisi!`;
-        err.style.display = 'block';
-        valid = false;
-      } else {
-        input.classList.remove('error');
-        err.style.display = 'none';
-      }
-    });
-
-    if (!valid) return;
-
-    const nama = document.getElementById('nama').value.trim();
-    const namaBisnis = document.getElementById('namaBisnis').value.trim();
-    const kategoriBisnis = document.getElementById('kategoriBisnis').value.trim();
-    const alamatBisnis = document.getElementById('alamatBisnis').value.trim();
-
-    const pesan = `Halo, saya ingin daftar akun JedaBisnis.%0A%0A` +
-      `Nama: ${nama}%0A` +
-      `Nama Bisnis: ${namaBisnis}%0A` +
-      `Kategori Bisnis: ${kategoriBisnis}%0A` +
-      `Alamat Bisnis: ${alamatBisnis}%0A%0A` +
-      `Metode Pembayaran: DANA (085171117627)%0A` +
-      `Harga: Rp99.000 (Diskon dari Rp100.000)`;
-
-    window.open(`https://wa.me/6285171117627?text=${pesan}`, '_blank');
-  }
-</script>
 </body>
 </html>
