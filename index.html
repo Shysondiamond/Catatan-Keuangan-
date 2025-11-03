@@ -187,11 +187,11 @@ a {
       flex-direction: column;
       align-items: center;
       color: #ff80c0;
-      animation: fadeIn 2s ease-in-out infinite alternate;
+      animation: fadeIn 0.8s ease-in-out infinite alternate;
     }
 
     .scroll-indicator svg {
-      width: 25px;
+      width: 35px;
       height: 25px;
       margin-top: 5px;
       animation: bounce 1.5s infinite;
@@ -268,15 +268,16 @@ ease;
     <!-- Slide 1 -->
     <section class="slide slide-1">
       <h1>Selamat Datang di <span style="color:#ff4081;">JedaBisnis</span></h1>
-      <p>Scroll untuk memilih bisnis Anda</p>
-      <button class="btn btn-register" onclick="document.querySelector('.slide-4').scrollIntoView({behavior:'smooth'})">
+      <img style='width:90%'src='https://shysondiamond.github.io/Catatan-Keuangan-/ilustrasi.png'/>
+      
+     <br/><br/> <button class="btn btn-register" onclick="document.querySelector('.slide-4').scrollIntoView({behavior:'smooth'})">
         Belum Punya Dashboard? Daftar Sekarang!
       </button>
 <button id="installBtn" class='btn btn-register'>
   📲 Install Aplikasi
 </button>
       <div class="scroll-indicator">
-        <span>Scroll</span>
+        <span>Scroll untuk pilih bisnis</span>
         <svg fill="#ff80c0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 21l-8-9h16z"/></svg>
       </div>
     </section>
@@ -557,137 +558,38 @@ ease;
 </script>
 
 <script>
-/* Kontrol scroll: 1 slide per aksi (mouse wheel, touch on mobile, keyboard) */
-(function() {
-  const container = document.querySelector('.slides-container');
-  const slides = document.querySelectorAll('.slide');
-  const slideCount = slides.length;
-  const slideHeight = () => window.innerHeight;
+// Scroll satu slide per aksi scroll
+const container = document.querySelector('.slides-container');
+const slides = document.querySelectorAll('.slide');
+let isScrolling = false;
 
-  let isAnimating = false;
-  let touchStartY = 0;
-  let touchMoved = false;
-  let lastScrollTimeout;
+container.addEventListener('wheel', (e) => {
+  e.preventDefault(); // hentikan default scroll
+  if (isScrolling) return; // cegah spam scroll cepat
+  isScrolling = true;
 
-  function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
+  const direction = e.deltaY > 0 ? 1 : -1; // arah scroll
+  const currentScroll = container.scrollTop;
+  const slideHeight = window.innerHeight;
 
-  function getCurrentIndex() {
-    // hitung index terdekat dari posisi scroll saat ini
-    return Math.round(container.scrollTop / slideHeight());
-  }
+  // Hitung indeks slide sekarang
+  let currentIndex = Math.round(currentScroll / slideHeight);
+  let nextIndex = currentIndex + direction;
 
-  function scrollToIndex(index) {
-    index = clamp(index, 0, slideCount - 1);
-    if (isAnimating || index === getCurrentIndex()) return;
-    isAnimating = true;
-    container.scrollTo({
-      top: index * slideHeight(),
-      behavior: 'smooth'
-    });
-    // kunci sementara agar tidak double-trigger. 800ms cukup untuk animasi smooth.
-    setTimeout(() => { isAnimating = false; }, 800);
-  }
+  // Batasi agar tidak keluar dari range slide
+  nextIndex = Math.max(0, Math.min(nextIndex, slides.length - 1));
 
-  /* --- Wheel (mouse/trackpad) --- */
-  container.addEventListener('wheel', (e) => {
-    // hanya jika ada delta (hindari trigger ketika trackpad kecil)
-    if (!e.deltaY) return;
-    e.preventDefault();
-    if (isAnimating) return;
-
-    const direction = e.deltaY > 0 ? 1 : -1;
-    const currentIndex = getCurrentIndex();
-    const nextIndex = clamp(currentIndex + direction, 0, slideCount - 1);
-
-    scrollToIndex(nextIndex);
-  }, { passive: false });
-
-  /* --- Touch (mobile) --- */
-  container.addEventListener('touchstart', (e) => {
-    if (e.touches && e.touches.length === 1) {
-      touchStartY = e.touches[0].clientY;
-      touchMoved = false;
-    }
-  }, { passive: true });
-
-  container.addEventListener('touchmove', (e) => {
-    // cegah momentum native dan multiple-swipe dengan hanya mencegah jika geseran vertikal nyata
-    if (!e.touches || e.touches.length !== 1) return;
-    const currentY = e.touches[0].clientY;
-    const deltaY = currentY - touchStartY;
-
-    // jika gerakan sangat kecil, biarkan; tapi jika sudah signifikan, preventDefault agar tidak meneruskan momentum
-    if (Math.abs(deltaY) > 10) {
-      // hentikan scrolling alami agar kita yang kontrol perpindahan slide
-      e.preventDefault();
-      touchMoved = true;
-    }
-  }, { passive: false });
-
-  container.addEventListener('touchend', (e) => {
-    if (!touchMoved) return;
-    // pada touchend hitung delta terakhir berdasarkan changedTouches (fallback)
-    const touch = (e.changedTouches && e.changedTouches[0]) || null;
-    let endY = touch ? touch.clientY : touchStartY;
-    let delta = endY - touchStartY;
-
-    // threshold kecil agar gestur micro tidak memicu
-    const threshold = 30;
-
-    if (Math.abs(delta) < threshold) {
-      // jika kurang dari threshold, snap kembali ke slide nearest
-      const idx = getCurrentIndex();
-      scrollToIndex(idx);
-      return;
-    }
-
-    const direction = delta < 0 ? 1 : -1; // delta negatif = geser ke atas => next slide (naik indeks)
-    const currentIndex = getCurrentIndex();
-    const nextIndex = clamp(currentIndex + direction, 0, slideCount - 1);
-
-    scrollToIndex(nextIndex);
-  }, { passive: false });
-
-  /* --- Keyboard arrows --- */
-  window.addEventListener('keydown', (e) => {
-    if (isAnimating) return;
-    if (e.key === 'ArrowDown' || e.key === 'PageDown') {
-      e.preventDefault();
-      scrollToIndex(getCurrentIndex() + 1);
-    } else if (e.key === 'ArrowUp' || e.key === 'PageUp') {
-      e.preventDefault();
-      scrollToIndex(getCurrentIndex() - 1);
-    } else if (e.key === 'Home') {
-      e.preventDefault();
-      scrollToIndex(0);
-    } else if (e.key === 'End') {
-      e.preventDefault();
-      scrollToIndex(slideCount - 1);
-    }
+  container.scrollTo({
+    top: nextIndex * slideHeight,
+    behavior: 'smooth'
   });
 
-  /* --- Fallback: jika scroll terjadi dari cara lain, snap to nearest (debounced) --- */
-  container.addEventListener('scroll', () => {
-    // jika selama animasi kita lakukan scroll (smooth), jangan intervensi sampai selesai
-    if (isAnimating) return;
-    clearTimeout(lastScrollTimeout);
-    lastScrollTimeout = setTimeout(() => {
-      const idx = getCurrentIndex();
-      scrollToIndex(idx);
-    }, 120); // setelah 120ms tanpa scroll -> snap
-  });
-
-  /* Sesuaikan respons ketika ukuran viewport berubah */
-  window.addEventListener('resize', () => {
-    // snap ke slide sekarang agar tetap aligned ketika rotasi/resize
-    const idx = getCurrentIndex();
-    container.scrollTo({ top: idx * slideHeight(), behavior: 'instant' });
-    // beberapa browser tidak mendukung behavior:'instant', jadi fallback:
-    setTimeout(() => container.scrollTo({ top: idx * slideHeight() }), 50);
-  });
-})();
+  // Delay untuk menunggu animasi scroll selesai
+  setTimeout(() => {
+    isScrolling = false;
+  }, 1000);
+}, { passive: false });
 </script>
-
 
 
 </body>
