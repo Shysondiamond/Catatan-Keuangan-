@@ -14,131 +14,32 @@
 
   <style>
     :root{
-      --bg: #0b1116;
-      --panel: #0f1722;
-      --muted: #97a3b2;
-      --pink: #ff85c1;
-      --pink-2: #ffb6d6;
-      --accent: #e18fb8;
-      --card-shadow: 0 10px 30px rgba(2,6,23,0.6);
-      --glass-border: rgba(255,255,255,0.03);
-      --max-width: 1200px;
-      --modal-bg: rgba(3,6,12,0.6);
-      --surface: #0f1722;
-      --surface-2: #111827;
-      --white-soft: #f7f9fb;
-    }
+  --bg: #f4f7fb;
+  --panel: #ffffff;
+  --muted: #4d5a6a;
+  --pink: #ff4d94;
+  --pink-2: #ff9fc9;
+  --accent: #e43f8f;
+  --card-shadow: 0 8px 20px rgba(0,0,0,0.1);
+  --glass-border: rgba(0,0,0,0.05);
+  --max-width: 1200px;
+  --modal-bg: rgba(0,0,0,0.5);
+  --surface: #ffffff;
+  --surface-2: #f0f3f8;
+  --white-soft: #1e1e1e;
+}
 
-    *{box-sizing:border-box;margin:0;padding:0}
-    html,body{height:100%}
-    body{
-      background: linear-gradient(180deg, #07121a 0%, var(--bg) 100%);
-      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-      color: var(--white-soft);
-      -webkit-font-smoothing:antialiased;
-      -moz-osx-font-smoothing:grayscale;
-      line-height:1.35;
-      padding: 12px;
-    }
-
-    .app-wrap{
-      max-width: var(--max-width);
-      margin: 6px auto;
-      display: grid;
-      grid-template-columns: 260px 1fr;
-      gap: 16px;
-      align-items: start;
-    }
-
-    .sidebar{
-      background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.00));
-      border-radius: 12px;
-      padding: 18px;
-      box-shadow: var(--card-shadow);
-      border: 1px solid var(--glass-border);
-      height: calc(100vh - 48px);
-      position: sticky;
-      top: 12px;
-      display:flex;
-      flex-direction:column;
-      gap:12px;
-      min-width:0;
-    }
-    .brand{font-weight:700;color:var(--pink);font-size:18px}
-    .small{font-size:13px;color:var(--muted)}
-    .nav{display:flex;flex-direction:column;gap:8px;margin-top:6px}
-    .nav button{
-      background:transparent;border:0;color:var(--white-soft);padding:10px 12px;border-radius:8px;text-align:left;cursor:pointer;
-      transition:all .12s;font-weight:600;
-    }
-    .nav button:hover{background:rgba(255,255,255,0.02)}
-    .nav button.active{color:var(--pink);background:rgba(255,255,255,0.02)}
-    .sidebar .meta{margin-top:auto}
-    .btn-ghost{background:transparent;border:1px solid rgba(255,255,255,0.04);padding:8px;border-radius:8px;color:var(--muted);cursor:pointer}
-    .badge{background:rgba(255,255,255,0.03);padding:6px 8px;border-radius:8px;font-weight:600;color:var(--pink)}
-
-    .main{display:flex;flex-direction:column;gap:12px;min-height: calc(100vh - 48px);}
-    .topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;}
-    .card{background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.00));border-radius: 12px;padding: 14px;box-shadow: var(--card-shadow);border: 1px solid var(--glass-border);}
-    .row{display:flex;gap:12px;flex-wrap:wrap}
-    .col{flex:1;min-width:220px}
-    input,select,textarea{width:100%;padding:8px;border-radius:8px;border:1px solid var(--glass-border);background:transparent;color:var(--white-soft)}
-    .input-plain{background:black;border:1px solid rgba(255,255,255,0.03);padding:8px;border-radius:8px;color:var(--white-soft)}
-    button.btn{background:linear-gradient(90deg,var(--pink),var(--pink-2));border:none;color:#071127;padding:8px 12px;border-radius:8px;cursor:pointer}
-    button.btn.secondary{background:#1b2430;color:var(--white-soft)}
-    table{width:100%;border-collapse:collapse;margin-top:8px;font-size:13px}
-    th,td{padding:8px;border-bottom:1px solid rgba(255,255,255,0.03);color:#dff0ff;text-align:left}
-    th{color:var(--muted);font-weight:600}
-
-    .kicker{font-size:12px;color:var(--muted)}
-    .muted{color:var(--muted)}
-    .hidden{display:none!important}
-
-    .tabs{display:flex;gap:8px;border-bottom:1px solid rgba(255,255,255,0.03);padding-bottom:8px;margin-bottom:10px;flex-wrap:wrap}
-    .tabbtn{background:transparent;border:0;color:var(--muted);padding:8px 12px;border-radius:8px;cursor:pointer}
-    .tabbtn.active{color:var(--pink);background:rgba(255,255,255,0.02)}
-
-    .toast{position:fixed;right:18px;bottom:18px;background:var(--pink);color:#071127;padding:10px 14px;border-radius:10px;z-index:9999;opacity:0;transform:translateY(6px);transition:all .28s}
-    .toast.show{opacity:1;transform:translateY(0)}
-
-    .product-card{padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.02);display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.00))}
-
-    @media (max-width: 1100px){
-      .app-wrap{grid-template-columns: 1fr; padding-bottom: 12px}
-      .sidebar{height:auto;position:relative;display:flex;flex-direction:row;align-items:center;gap:12px;padding:10px}
-      .nav{flex-direction:row;overflow:auto}
-      .nav button{white-space:nowrap}
-      .sidebar .meta{display:none}
-    }
-
-    @media (max-width: 720px){
-      body{padding:8px}
-      .card{padding:10px}
-      .brand{font-size:16px}
-      .sidebar{padding:8px}
-      .topbar{flex-direction:column;align-items:flex-start;gap:6px}
-      .row{flex-direction:column}
-      .product-card{flex-direction:column;align-items:flex-start}
-      .product-card > div:last-child{align-self:stretch;display:flex;justify-content:space-between}
-    }
-
-    /* Modal - pure CSS/JS */
-    .modal-backdrop{position:fixed;inset:0;background:var(--modal-bg);display:none;align-items:center;justify-content:center;z-index:2000;padding:18px}
-    .modal{background:linear-gradient(180deg,#0b1220,#0f1722);border-radius:12px;padding:16px;min-width:280px;max-width:720px;width:100%;box-shadow:0 20px 50px rgba(2,6,23,0.7);border:1px solid var(--glass-border)}
-    .modal h3{margin-bottom:10px;color:var(--pink)}
-    .modal .row{margin-top:6px}
-    .modal .actions{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
-    .modal.show{animation:modalIn .18s ease}
-    @keyframes modalIn{from{transform:translateY(8px);opacity:0}to{transform:translateY(0);opacity:1}}
-
-    .search-wrap{display:flex;gap:8px;align-items:center}
-    .search-input{padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);background:transparent;color:var(--white-soft);min-width:0}
-
-    .table-wrap{overflow:auto;max-width:100%}
-    .small-quiet{font-size:12px;color:var(--muted)}
-    .muted-2{color:rgba(255,255,255,0.6)}
-    
-    /* ... CSS yang sudah ada ... */
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  background: linear-gradient(180deg, #ffffff 0%, var(--bg) 100%);
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  color: var(--white-soft);
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  line-height:1.35;
+  padding: 12px;
+}
 
 .app-wrap{
   max-width: var(--max-width);
@@ -149,20 +50,8 @@
   align-items: start;
 }
 
-/* Tombol Toggle untuk Mobile */
-.sidebar-toggle {
-  display: none; /* Sembunyikan secara default (di desktop) */
-  background: linear-gradient(90deg,var(--pink),var(--pink-2));
-  border: none;
-  color: #071127;
-  padding: 8px 12px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 600;
-}
-
 .sidebar{
-  background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.00));
+  background: linear-gradient(180deg, rgba(255,255,255,1), rgba(245,247,251,1));
   border-radius: 12px;
   padding: 18px;
   box-shadow: var(--card-shadow);
@@ -174,49 +63,117 @@
   flex-direction:column;
   gap:12px;
   min-width:0;
-  transition: transform 0.3s ease-out, opacity 0.3s ease-out; /* Tambahkan transisi */
 }
+.brand{font-weight:700;color:var(--pink);font-size:18px}
+.small{font-size:13px;color:var(--muted)}
+.nav{display:flex;flex-direction:column;gap:8px;margin-top:6px}
+.nav button{
+  background:transparent;border:0;color:var(--white-soft);padding:10px 12px;border-radius:8px;text-align:left;cursor:pointer;
+  transition:all .12s;font-weight:600;
+}
+.nav button:hover{background:rgba(0,0,0,0.05)}
+.nav button.active{color:var(--pink);background:rgba(0,0,0,0.05)}
+.sidebar .meta{margin-top:auto}
+.btn-ghost{background:transparent;border:1px solid rgba(0,0,0,0.1);padding:8px;border-radius:8px;color:var(--muted);cursor:pointer}
+.badge{background:rgba(255,76,153,0.1);padding:6px 8px;border-radius:8px;font-weight:600;color:var(--pink)}
 
-/* ... CSS yang sudah ada ... */
+.main{display:flex;flex-direction:column;gap:12px;min-height: calc(100vh - 48px);}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;}
+.card{background: var(--surface);border-radius: 12px;padding: 14px;box-shadow: var(--card-shadow);border: 1px solid var(--glass-border);}
+.row{display:flex;gap:12px;flex-wrap:wrap}
+.col{flex:1;min-width:220px}
+input,select,textarea{width:100%;padding:8px;border-radius:8px;border:1px solid rgba(0,0,0,0.1);background:#fff;color:#333}
+.input-plain{background:#fff;border:1px solid rgba(0,0,0,0.1);padding:8px;border-radius:8px;color:#333}
+button.btn{background:linear-gradient(90deg,var(--pink),var(--pink-2));border:none;color:#fff;padding:8px 12px;border-radius:8px;cursor:pointer;font-weight:600}
+button.btn.secondary{background:#e3e9f0;color:#333}
+table{width:100%;border-collapse:collapse;margin-top:8px;font-size:13px}
+th,td{padding:8px;border-bottom:1px solid rgba(0,0,0,0.05);color:#333;text-align:left}
+th{color:var(--muted);font-weight:600}
+
+.kicker{font-size:12px;color:var(--muted)}
+.muted{color:var(--muted)}
+.hidden{display:none!important}
+
+.tabs{display:flex;gap:8px;border-bottom:1px solid rgba(0,0,0,0.05);padding-bottom:8px;margin-bottom:10px;flex-wrap:wrap}
+.tabbtn{background:transparent;border:0;color:var(--muted);padding:8px 12px;border-radius:8px;cursor:pointer}
+.tabbtn.active{color:var(--pink);background:rgba(255,76,153,0.1)}
+
+.toast{position:fixed;right:18px;bottom:18px;background:var(--pink);color:#fff;padding:10px 14px;border-radius:10px;z-index:9999;opacity:0;transform:translateY(6px);transition:all .28s}
+.toast.show{opacity:1;transform:translateY(0)}
+
+.product-card{padding:10px;border-radius:8px;border:1px solid rgba(0,0,0,0.05);display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;background:#fff}
 
 @media (max-width: 1100px){
   .app-wrap{grid-template-columns: 1fr; padding-bottom: 12px}
+  .sidebar{height:auto;position:relative;display:flex;flex-direction:row;align-items:center;gap:12px;padding:10px}
+  .nav{flex-direction:row;overflow:auto}
+  .nav button{white-space:nowrap}
+  .sidebar .meta{display:none}
+}
+
+@media (max-width: 720px){
+  body{padding:8px}
+  .card{padding:10px}
+  .brand{font-size:16px}
+  .sidebar{padding:8px}
+  .topbar{flex-direction:column;align-items:flex-start;gap:6px}
+  .row{flex-direction:column}
+  .product-card{flex-direction:column;align-items:flex-start}
+  .product-card > div:last-child{align-self:stretch;display:flex;justify-content:space-between}
+}
+
+/* Modal */
+.modal-backdrop{position:fixed;inset:0;background:var(--modal-bg);display:none;align-items:center;justify-content:center;z-index:2000;padding:18px}
+.modal{background:#ffffff;border-radius:12px;padding:16px;min-width:280px;max-width:720px;width:100%;box-shadow:0 20px 50px rgba(0,0,0,0.2);border:1px solid rgba(0,0,0,0.1)}
+.modal h3{margin-bottom:10px;color:var(--pink)}
+.modal .row{margin-top:6px}
+.modal .actions{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
+.modal.show{animation:modalIn .18s ease}
+@keyframes modalIn{from{transform:translateY(8px);opacity:0}to{transform:translateY(0);opacity:1}}
+
+.search-wrap{display:flex;gap:8px;align-items:center}
+.search-input{padding:8px;border-radius:8px;border:1px solid rgba(0,0,0,0.1);background:#fff;color:#333;min-width:0}
+
+.table-wrap{overflow:auto;max-width:100%}
+.small-quiet{font-size:12px;color:var(--muted)}
+.muted-2{color:rgba(0,0,0,0.6)}
+
+/* Tombol Toggle untuk Mobile */
+.sidebar-toggle {
+  display: none;
+  background: linear-gradient(90deg,var(--pink),var(--pink-2));
+  border: none;
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+@media (max-width: 1100px){
   .sidebar-toggle {
-    display: block; /* Tampilkan tombol toggle di HP */
-    margin-bottom: 12px; /* Jarak antara tombol dan main content */
+    display: block;
+    margin-bottom: 12px;
   }
   .sidebar{
     height: auto;
     position: relative;
-    padding: 18px; /* Kembalikan padding normal */
-    
-    /* Sembunyikan secara default di HP (gunakan kelas hidden untuk sembunyikan semua) */
-    display: none; 
-    
-    /* Hapus/modifikasi style layout yang tidak relevan untuk toggle */
-    flex-direction: column; 
+    padding: 18px;
+    display: none;
+    flex-direction: column;
     align-items: stretch;
     top: 0;
   }
-  
-  /* Saat sidebar dibuka */
   .sidebar.sidebar-open {
-    display: flex; /* Tampilkan kembali saat kelas 'sidebar-open' ada */
+    display: flex;
   }
-
   .nav{
-    flex-direction: column; /* Ubah navigasi kembali ke vertikal di mode toggle */
+    flex-direction: column;
     overflow: visible;
   }
-  
-  .sidebar .meta{display: block; margin-top: 12px;} /* Tampilkan meta di mode toggle */
-  
-  /* Sembunyikan navigasi di tampilan row di layar lebar (original) */
-  /* .nav{flex-direction:row;overflow:auto} */ 
-  /* .sidebar .meta{display:none} */ 
+  .sidebar .meta{display: block; margin-top: 12px;}
 }
 
-/* ... CSS yang sudah ada ... */
   </style>
 </head>
 <body>
